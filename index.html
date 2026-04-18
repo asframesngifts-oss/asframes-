@@ -186,8 +186,8 @@ if(localStorage.getItem('asf_auth')==='1'){
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>#</th><th>Customer</th><th>Phone</th><th>Size</th><th>Qty</th><th>Status</th>
-        <th>Amount</th><th>Advance</th><th>Balance</th><th>Last msg</th><th>Actions</th>
+        <th>#</th><th>Customer</th><th>Phone</th><th>Size</th><th>Frame</th><th>Qty</th><th>Status</th>
+        <th>Amount</th><th>Advance</th><th>Balance</th><th>Payment</th><th>Last msg</th><th>Actions</th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -198,10 +198,13 @@ if(localStorage.getItem('asf_auth')==='1'){
 <div class="overlay" id="addModal">
 <div class="modal">
   <h2>New order</h2>
-  <div class="frow"><label>Customer name</label><input id="f_name" type="text" placeholder="Ravi Kumar"></div>
+  <div class="frow"><label>Customer name</label>
+    <input id="f_name" type="text" placeholder="Ravi Kumar" onfocus="loadRecentCustomers()" oninput="filterRecents(this.value)">
+    <div id="recentList" style="display:none;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius);margin-top:4px;max-height:160px;overflow-y:auto"></div>
+  </div>
   <div class="frow"><label>WhatsApp number (with country code)</label><input id="f_phone" type="text" placeholder="919876543210"></div>
   <div class="frow"><label>Frame size</label>
-    <select id="f_size" onchange="toggleCustomSize('f')"><option>6×8</option><option>8×12</option><option>12×18</option><option>16×24</option><option>20×24</option><option>20×30</option><option>Custom</option></select>
+    <select id="f_size" onchange="toggleCustomSize('f')"><option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option></select>
   </div>
   <div class="frow" id="f_custombox" style="display:none"><label>Custom size</label>
     <input id="f_customsize" type="text" placeholder="e.g. 14×18 or 20×24 inches">
@@ -234,7 +237,7 @@ if(localStorage.getItem('asf_auth')==='1'){
   <div class="frow"><label>Customer name</label><input id="e_name" type="text"></div>
   <div class="frow"><label>WhatsApp number</label><input id="e_phone" type="text"></div>
   <div class="frow"><label>Frame size</label>
-    <select id="e_size" onchange="toggleCustomSize('e')"><option>6×8</option><option>8×12</option><option>12×18</option><option>16×24</option><option>20×24</option><option>20×30</option><option>Custom</option></select>
+    <select id="e_size" onchange="toggleCustomSize('e')"><option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option></select>
   </div>
   <div class="frow" id="e_custombox" style="display:none"><label>Custom size</label>
     <input id="e_customsize" type="text" placeholder="e.g. 14×18 or 20×24 inches">
@@ -267,7 +270,7 @@ if(localStorage.getItem('asf_auth')==='1'){
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
-let WEBHOOK_URL = localStorage.getItem('asf_webhook') || 'https://script.google.com/macros/s/AKfycbzQKtMczs9YjOWtuvSMshdPNVLSn74CcLj1KGRbkqZFe7dxNW3h8Bh4a7PKnrpKP1kaMQ/exec';
+let WEBHOOK_URL = localStorage.getItem('asf_webhook') || 'https://script.google.com/macros/s/AKfycbzc1Ze12m32IMo9KY_LaMOf1BhSCn0ancBhI9XstVwvZCx6Sls3AJgpD7q79p9Zty8OUg/exec';
 // ──────────────────────────────────────────────────────────
 
 const WA_MSGS = {
@@ -370,10 +373,53 @@ function deleteOrder(idx){
   updateStats();
 }
 
+function saveRecentCustomer(name, phone) {
+  let recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
+  // Remove if already exists
+  recents = recents.filter(r => r.phone !== phone);
+  // Add to front
+  recents.unshift({ name, phone });
+  // Keep only last 20
+  recents = recents.slice(0, 20);
+  localStorage.setItem('asf_recents', JSON.stringify(recents));
+  loadRecentCustomers();
+}
+
+function loadRecentCustomers() {
+  const recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
+  const nameInput = document.getElementById('f_name');
+  const phoneInput = document.getElementById('f_phone');
+  const listEl = document.getElementById('recentList');
+  if(!listEl) return;
+  if(!recents.length){ listEl.style.display='none'; return; }
+  listEl.style.display='block';
+  listEl.innerHTML = recents.map(r =>
+    '<div onclick="fillCustomer(''+r.name+'',''+r.phone+'')" style="padding:6px 10px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><span>'+r.name+'</span><span style="color:var(--text2);font-size:12px">'+r.phone+'</span></div>'
+  ).join('');
+}
+
+function fillCustomer(name, phone) {
+  document.getElementById('f_name').value = name;
+  document.getElementById('f_phone').value = phone;
+  document.getElementById('recentList').style.display = 'none';
+}
+
 function saveLocal() { localStorage.setItem('asf_orders', JSON.stringify(orders)); }
 function saveRemind() { localStorage.setItem('asf_remind', JSON.stringify(remindAt)); }
 
 // ─── CALCULATIONS ─────────────────────────────────────────
+function filterRecents(q){
+  const recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
+  const listEl = document.getElementById('recentList');
+  if(!q){ loadRecentCustomers(); return; }
+  const filtered = recents.filter(r => r.name.toLowerCase().includes(q.toLowerCase()) || r.phone.includes(q));
+  if(!filtered.length){ listEl.style.display='none'; return; }
+  listEl.style.display='block';
+  listEl.innerHTML = filtered.map(r =>
+    '<div onclick="fillCustomer(''+r.name+'',''+r.phone+'')" style="padding:6px 10px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><span>'+r.name+'</span><span style="color:var(--text2);font-size:12px">'+r.phone+'</span></div>'
+  ).join('');
+}
+
 function toggleCustomSize(p){
   const val = document.getElementById(p+'_size').value;
   const box = document.getElementById(p+'_custombox');
@@ -407,15 +453,19 @@ function addOrder() {
   const fcustom = document.getElementById('f_customsize').value.trim();
   const finalSize = fsize === 'Custom' && fcustom ? 'Custom: ' + fcustom : fsize;
   const fqty = document.getElementById('f_qty').value;
+  const fframetype = document.getElementById('f_frametype').value;
   const o = {
     id: Date.now(), name, phone,
     size: finalSize,
     qty: fqty,
+    frameType: fframetype,
     notes: document.getElementById('f_notes').value,
     status: 'New', amount, advance,
     balance: Math.max(0, amount - advance),
     lastMsg: null, created: Date.now(), fromPortal: false
   };
+  // Save customer to recent list
+  saveRecentCustomer(name, phone);
   orders.push(o);
   saveLocal();
   pushToSheet(o);
@@ -467,15 +517,16 @@ function saveEdit() {
   const eFinalSize = esize === 'Custom' && ecustom ? 'Custom: ' + ecustom : esize;
   orders[idx] = {
     ...orders[idx],
-    name:    document.getElementById('e_name').value,
-    phone:   document.getElementById('e_phone').value,
-    size:    eFinalSize,
-    qty:     document.getElementById('e_qty').value,
-    status:  newStatus,
-    notes:   document.getElementById('e_notes').value,
-    amount:  parseFloat(document.getElementById('e_amount').value) || 0,
-    advance: parseFloat(document.getElementById('e_advance').value) || 0,
-    balance: Math.max(0, (parseFloat(document.getElementById('e_amount').value)||0) - (parseFloat(document.getElementById('e_advance').value)||0))
+    name:      document.getElementById('e_name').value,
+    phone:     document.getElementById('e_phone').value,
+    size:      eFinalSize,
+    qty:       document.getElementById('e_qty').value,
+    frameType: document.getElementById('e_frametype').value,
+    status:    newStatus,
+    notes:     document.getElementById('e_notes').value,
+    amount:    parseFloat(document.getElementById('e_amount').value) || 0,
+    advance:   parseFloat(document.getElementById('e_advance').value) || 0,
+    balance:   Math.max(0, (parseFloat(document.getElementById('e_amount').value)||0) - (parseFloat(document.getElementById('e_advance').value)||0))
   };
   saveLocal();
   pushToSheet(orders[idx]);
@@ -532,17 +583,20 @@ function render() {
     const urgent = minsAgo >= 120 && o.status !== 'Delivered';
     const sc = ('s-' + o.status).replace(/ /g, '-');
     const tr = document.createElement('tr');
+    const payLabel = (parseFloat(o.balance)||0) === 0 ? '<span style="background:#EAF3DE;color:#2d7a4f;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">Paid</span>' : '<span style="background:#FAECE7;color:#993C1D;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">₹'+o.balance+' left</span>';
     tr.innerHTML = `
       <td style="color:var(--text2);font-size:12px">#${o.id}</td>
       <td style="font-weight:500">${o.name}${o.fromPortal ? '<span class="portal-tag">portal</span>' : ''}
         ${o.notes ? '<br><span style="font-size:11px;color:var(--text2)">' + o.notes.substring(0,38) + (o.notes.length>38?'…':'') + '</span>' : ''}</td>
       <td style="color:var(--text2)">${o.phone}</td>
-      <td>${o.size}</td>
+      <td>${o.size||'-'}</td>
+      <td style="color:var(--text2);font-size:12px">${o.frameType||'-'}</td>
       <td style="text-align:center">${o.qty||1}</td>
       <td><span class="pill ${sc}">${o.status}</span></td>
       <td>₹${o.amount}</td>
       <td style="color:var(--green)">₹${o.advance}</td>
       <td style="color:${o.balance>0?'var(--red)':'var(--green)'}">₹${o.balance}</td>
+      <td>${payLabel}</td>
       <td><span class="timer ${urgent?'urgent':''}">${timeSince(o.lastMsg)}</span></td>
       <td class="actions">
         <button class="btn sm" onclick="openEdit(${idx})">Edit</button>
