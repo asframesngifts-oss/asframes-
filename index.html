@@ -201,14 +201,17 @@ if(localStorage.getItem('asf_auth')==='1'){
   <div class="frow"><label>Customer name</label><input id="f_name" type="text" placeholder="Ravi Kumar"></div>
   <div class="frow"><label>WhatsApp number (with country code)</label><input id="f_phone" type="text" placeholder="919876543210"></div>
   <div class="frow"><label>Frame size</label>
-   <select id="f_size" onchange="toggleCustomSize('f')"><option>20×30</option><option>6×8</option><option>8×12</option><option>10×12</option><option>12×18</option><option>16×20</option><option>Custom</option></select>
+    <select id="f_size" onchange="toggleCustomSize('f')"><option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option></select>
   </div>
   <div class="frow" id="f_custombox" style="display:none"><label>Custom size</label>
-  <input id="f_customsize" type="text" placeholder="e.g. 14×18 inches">
-</div>
-<div class="frow"><label>Quantity</label>
-  <select id="f_qty"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6+</option></select>
-</div>
+    <input id="f_customsize" type="text" placeholder="e.g. 14×18 or 20×24 inches">
+  </div>
+  <div class="frow"><label>Quantity</label>
+    <select id="f_qty"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6+</option></select>
+  </div>
+  <div class="frow"><label>Frame type</label>
+    <select id="f_frametype"><option value="1 inch">1 inch frame</option><option value="1.5 inch">1.5 inch frame</option><option value="2 inch">2 inch frame</option><option value="3 inch">3 inch frame</option><option value="Custom">Custom frame</option></select>
+  </div>
   <div class="frow"><label>Notes / design instructions</label><textarea id="f_notes" placeholder="Background colour, text, special requests…"></textarea></div>
   <div class="frow"><label>Reference photo (optional)</label><input id="f_photo" type="file" accept="image/*"></div>
   <div class="fin-row">
@@ -231,14 +234,17 @@ if(localStorage.getItem('asf_auth')==='1'){
   <div class="frow"><label>Customer name</label><input id="e_name" type="text"></div>
   <div class="frow"><label>WhatsApp number</label><input id="e_phone" type="text"></div>
   <div class="frow"><label>Frame size</label>
-    <select id="e_size" onchange="toggleCustomSize('e')"><option>20×30</option><option>6×8</option><option>8×12</option><option>10×12</option><option>12×18</option><option>16×20</option><option>Custom</option></select>
+    <select id="e_size" onchange="toggleCustomSize('e')"><option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option></select>
   </div>
   <div class="frow" id="e_custombox" style="display:none"><label>Custom size</label>
-  <input id="e_customsize" type="text" placeholder="e.g. 14×18 inches">
-</div>
-<div class="frow"><label>Quantity</label>
-  <select id="e_qty"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6+</option></select>
-</div>
+    <input id="e_customsize" type="text" placeholder="e.g. 14×18 or 20×24 inches">
+  </div>
+  <div class="frow"><label>Quantity</label>
+    <select id="e_qty"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6+</option></select>
+  </div>
+  <div class="frow"><label>Frame type</label>
+    <select id="e_frametype"><option value="1 inch">1 inch frame</option><option value="1.5 inch">1.5 inch frame</option><option value="2 inch">2 inch frame</option><option value="3 inch">3 inch frame</option><option value="Custom">Custom frame</option></select>
+  </div>
   <div class="frow"><label>Status <small style="color:var(--text2)">(changing status auto-sends WhatsApp)</small></label>
     <select id="e_status">
       <option>New</option><option>Designing</option><option>Sent for Review</option>
@@ -368,7 +374,7 @@ function saveLocal() { localStorage.setItem('asf_orders', JSON.stringify(orders)
 function saveRemind() { localStorage.setItem('asf_remind', JSON.stringify(remindAt)); }
 
 // ─── CALCULATIONS ─────────────────────────────────────────
-  function toggleCustomSize(p){
+function toggleCustomSize(p){
   const val = document.getElementById(p+'_size').value;
   const box = document.getElementById(p+'_custombox');
   if(val === 'Custom'){
@@ -379,6 +385,7 @@ function saveRemind() { localStorage.setItem('asf_remind', JSON.stringify(remind
     document.getElementById(p+'_customsize').value = '';
   }
 }
+
 function calcBal(p) {
   const a = parseFloat(document.getElementById(p+'_amount').value) || 0;
   const adv = parseFloat(document.getElementById(p+'_advance').value) || 0;
@@ -396,9 +403,14 @@ function addOrder() {
   if (!name || !phone) { alert('Name and phone are required.'); return; }
   const amount = parseFloat(document.getElementById('f_amount').value) || 0;
   const advance = parseFloat(document.getElementById('f_advance').value) || 0;
+  const fsize = document.getElementById('f_size').value;
+  const fcustom = document.getElementById('f_customsize').value.trim();
+  const finalSize = fsize === 'Custom' && fcustom ? 'Custom: ' + fcustom : fsize;
+  const fqty = document.getElementById('f_qty').value;
   const o = {
     id: Date.now(), name, phone,
-    size: document.getElementById('f_size').value,
+    size: finalSize,
+    qty: fqty,
     notes: document.getElementById('f_notes').value,
     status: 'New', amount, advance,
     balance: Math.max(0, amount - advance),
@@ -408,7 +420,9 @@ function addOrder() {
   saveLocal();
   pushToSheet(o);
   closeModal('add');
-  ['f_name','f_phone','f_notes','f_amount','f_advance','f_balance'].forEach(i => document.getElementById(i).value = '');
+  ['f_name','f_phone','f_notes','f_amount','f_advance','f_balance','f_customsize'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('f_qty').value = '1';
+  document.getElementById('f_custombox').style.display = 'none';
   render(); updateStats();
 }
 
@@ -421,6 +435,24 @@ function openEdit(idx) {
   document.getElementById('e_size').value = o.size;
   document.getElementById('e_status').value = o.status;
   document.getElementById('e_notes').value = o.notes || '';
+  if(document.getElementById('e_qty')) document.getElementById('e_qty').value = o.qty || '1';
+  if(document.getElementById('e_frametype')) document.getElementById('e_frametype').value = o.frameType || '1 inch';
+  if(o.size && o.size.startsWith('Custom:')){
+    document.getElementById('e_size').value = 'Custom';
+    if(document.getElementById('e_custombox')) document.getElementById('e_custombox').style.display = 'block';
+    if(document.getElementById('e_customsize')) document.getElementById('e_customsize').value = o.size.replace('Custom: ','');
+  } else {
+    if(document.getElementById('e_custombox')) document.getElementById('e_custombox').style.display = 'none';
+  }
+  document.getElementById('e_qty').value = o.qty || '1';
+  if(o.size && o.size.startsWith('Custom:')){
+    document.getElementById('e_size').value = 'Custom';
+    document.getElementById('e_custombox').style.display = 'block';
+    document.getElementById('e_customsize').value = o.size.replace('Custom: ','');
+  } else {
+    document.getElementById('e_custombox').style.display = 'none';
+    document.getElementById('e_customsize').value = '';
+  }
   document.getElementById('e_amount').value = o.amount || 0;
   document.getElementById('e_advance').value = o.advance || 0;
   document.getElementById('e_balance').value = o.balance || 0;
@@ -430,11 +462,15 @@ function saveEdit() {
   const idx = parseInt(document.getElementById('e_idx').value);
   const oldStatus = orders[idx].status;
   const newStatus = document.getElementById('e_status').value;
+  const esize = document.getElementById('e_size').value;
+  const ecustom = document.getElementById('e_customsize').value.trim();
+  const eFinalSize = esize === 'Custom' && ecustom ? 'Custom: ' + ecustom : esize;
   orders[idx] = {
     ...orders[idx],
     name:    document.getElementById('e_name').value,
     phone:   document.getElementById('e_phone').value,
-    size:    document.getElementById('e_size').value,
+    size:    eFinalSize,
+    qty:     document.getElementById('e_qty').value,
     status:  newStatus,
     notes:   document.getElementById('e_notes').value,
     amount:  parseFloat(document.getElementById('e_amount').value) || 0,
@@ -502,6 +538,7 @@ function render() {
         ${o.notes ? '<br><span style="font-size:11px;color:var(--text2)">' + o.notes.substring(0,38) + (o.notes.length>38?'…':'') + '</span>' : ''}</td>
       <td style="color:var(--text2)">${o.phone}</td>
       <td>${o.size}</td>
+      <td style="text-align:center">${o.qty||1}</td>
       <td><span class="pill ${sc}">${o.status}</span></td>
       <td>₹${o.amount}</td>
       <td style="color:var(--green)">₹${o.advance}</td>
