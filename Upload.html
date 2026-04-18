@@ -3,346 +3,694 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AS Frames – Upload Your Photo</title>
+<title>AS Frames – Order Dashboard</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --accent:#D85A30;
-  --accent2:#B84820;
-  --bg:#f7f4ef;
-  --surface:#ffffff;
-  --text:#1a1a18;
-  --text2:#6b6a65;
-  --border:rgba(0,0,0,0.1);
-  --border2:rgba(0,0,0,0.18);
-  --radius:12px;
-  --radius-lg:18px;
+  --bg:#f7f5f0;--surface:#fff;--surface2:#f0ede6;
+  --text:#1a1a18;--text2:#6b6a65;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --accent:#D85A30;--accent2:#B84820;
+  --green:#2d7a4f;--red:#993C1D;--wa:#128C7E;
+  --radius:10px;--radius-lg:14px;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;padding:0;color:var(--text)}
-
-/* header */
-.header{background:var(--accent);padding:1.5rem 1.25rem 3rem;text-align:center;position:relative;overflow:hidden}
-.header::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:40px;background:var(--bg);border-radius:50% 50% 0 0 / 100% 100% 0 0}
-.header-logo{font-size:28px;font-weight:700;color:#fff;letter-spacing:-0.5px}
-.header-logo span{opacity:.8}
-.header-sub{font-size:14px;color:rgba(255,255,255,0.85);margin-top:4px}
-
-/* card */
-.card{background:var(--surface);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:1.5rem;margin:0 1rem 1rem;margin-top:-1.5rem;position:relative;z-index:1}
-
-/* steps indicator */
-.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:1.5rem}
-.step-dot{width:28px;height:28px;border-radius:50%;background:var(--bg);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text2);transition:all .3s}
-.step-dot.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.step-dot.done{background:#2d7a4f;border-color:#2d7a4f;color:#fff}
-.step-line{flex:1;height:2px;background:var(--border);max-width:40px;transition:background .3s}
-.step-line.done{background:#2d7a4f}
-
-/* form */
-.section{display:none}
-.section.active{display:block}
-.section-title{font-size:16px;font-weight:600;margin-bottom:4px}
-.section-sub{font-size:13px;color:var(--text2);margin-bottom:1.25rem}
-.frow{margin-bottom:1rem}
-.frow label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
-.frow input,.frow select,.frow textarea{width:100%;padding:12px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:15px;font-family:inherit;transition:border-color .2s;-webkit-appearance:none}
-.frow input:focus,.frow select:focus,.frow textarea:focus{outline:none;border-color:var(--accent)}
-.frow textarea{resize:none;min-height:80px}
-.frow select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6a65' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
-
-/* photo upload */
-.upload-box{border:2px dashed var(--border2);border-radius:var(--radius);padding:2rem 1rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg)}
-.upload-box:hover,.upload-box.dragover{border-color:var(--accent);background:#fdf1ec}
-.upload-box input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-icon{width:48px;height:48px;background:#fdf1ec;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
-.upload-icon svg{width:22px;height:22px}
-.upload-title{font-size:15px;font-weight:500;margin-bottom:4px}
-.upload-sub{font-size:12px;color:var(--text2)}
-.preview-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--radius);margin-top:12px;display:none}
-.preview-name{font-size:12px;color:#2d7a4f;margin-top:8px;text-align:center;display:none}
-
-/* size cards */
-.size-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.5rem}
-.size-card{border:1.5px solid var(--border2);border-radius:var(--radius);padding:.75rem .5rem;text-align:center;cursor:pointer;transition:all .2s}
-.size-card:hover{border-color:var(--accent)}
-.size-card.selected{border-color:var(--accent);background:#fdf1ec}
-.size-card .sz{font-size:15px;font-weight:600;color:var(--text)}
-.size-card .sz-label{font-size:10px;color:var(--text2);margin-top:2px}
-
-/* buttons */
-.btn-next{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:16px;font-weight:600;cursor:pointer;margin-top:.5rem;transition:background .2s}
-.btn-next:hover{background:var(--accent2)}
-.btn-back{width:100%;padding:12px;background:transparent;color:var(--text2);border:0.5px solid var(--border2);border-radius:var(--radius);font-size:14px;cursor:pointer;margin-top:.5rem}
-
-/* success */
-.success{text-align:center;padding:1rem 0}
-.success-icon{width:64px;height:64px;background:#EAF3DE;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
-.success-icon svg{width:32px;height:32px}
-.success h2{font-size:20px;font-weight:600;margin-bottom:.5rem}
-.success p{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:1.25rem}
-.wa-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#128C7E;color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:500;cursor:pointer;text-decoration:none;margin-bottom:.75rem}
-.wa-btn:hover{background:#0a6b60}
-
-/* whatsapp float */
-.wa-float{position:fixed;bottom:1.5rem;right:1.5rem;background:#128C7E;color:#fff;border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.2);text-decoration:none;z-index:50}
-
-/* footer */
-.footer{text-align:center;padding:1.5rem 1rem;font-size:12px;color:var(--text2)}
-.footer a{color:var(--accent);text-decoration:none}
-
-.error-msg{font-size:12px;color:#993C1D;margin-top:4px;display:none}
-.required{color:var(--accent)}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111110;--surface:#1c1c1a;--surface2:#242422;
+  --text:#eeebe3;--text2:#888780;
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;padding:1rem;color:var(--text)}
+.app{max-width:1200px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.25rem;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1rem;gap:12px;flex-wrap:wrap}
+.logo{font-size:19px;font-weight:600;letter-spacing:-.5px}.logo em{color:var(--accent);font-style:normal}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.dot{width:7px;height:7px;border-radius:50%;background:#ccc}
+.dot.live{background:#3B6D11;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.stat{background:var(--surface2);border-radius:var(--radius);padding:.9rem 1rem}
+.stat-label{font-size:11px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.stat-val{font-size:23px;font-weight:600;color:var(--text)}
+.toolbar{display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;align-items:center}
+.toolbar input[type=text],.toolbar select{padding:7px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:13px}
+.toolbar input[type=text]{flex:1;min-width:160px}
+.btn{padding:7px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent2)}
+.btn.wa{background:var(--wa);border-color:var(--wa);color:#fff}
+.btn.wa:hover{background:#0a6b60}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.remind{border-color:var(--accent);color:var(--accent)}
+.table-wrap{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+thead th{background:var(--surface2);padding:9px 10px;text-align:left;font-weight:500;font-size:11px;color:var(--text2);border-bottom:0.5px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.4px}
+tbody tr{border-bottom:0.5px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--surface2)}
+tbody td{padding:8px 10px;vertical-align:middle}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:500}
+.s-New{background:#E6F1FB;color:#185FA5}
+.s-Designing{background:#FAEEDA;color:#854F0B}
+.s-Sent-for-Review{background:#EEEDFE;color:#534AB7}
+.s-Approved{background:#EAF3DE;color:#3B6D11}
+.s-Printing{background:#FAECE7;color:#993C1D}
+.s-Ready{background:#d4f0e0;color:#1a6636}
+.s-Delivered{background:#F1EFE8;color:#5F5E5A}
+.timer{display:inline-flex;align-items:center;font-size:11px;color:var(--text2);background:var(--surface2);border-radius:999px;padding:2px 8px}
+.timer.urgent{color:#993C1D;background:#FAECE7;font-weight:500}
+.actions{display:flex;gap:4px;flex-wrap:wrap}
+.portal-tag{font-size:10px;background:#E6F1FB;color:#185FA5;border-radius:4px;padding:1px 5px;margin-left:4px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:1.5rem;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:1rem}
+.frow{margin-bottom:.7rem;position:relative}
+.frow label{display:block;font-size:12px;color:var(--text2);margin-bottom:3px}
+.frow input,.frow select,.frow textarea{width:100%;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit}
+.frow textarea{resize:vertical;min-height:55px}
+.frow input[readonly]{background:var(--surface2)}
+.fin-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:.7rem}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
+.alert-bar{display:none;position:fixed;top:16px;right:16px;z-index:200;background:var(--accent);color:#fff;padding:12px 18px;border-radius:var(--radius-lg);font-size:13px;font-weight:500;box-shadow:0 4px 24px rgba(0,0,0,.25);max-width:320px;animation:slidein .3s ease}
+@keyframes slidein{from{transform:translateX(120%)}to{transform:translateX(0)}}
+.alert-bar.show{display:flex;align-items:center;gap:10px}
+.recent-list{display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius);z-index:50;max-height:150px;overflow-y:auto}
+.recent-item{padding:7px 10px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;border-bottom:0.5px solid var(--border)}
+.recent-item:hover{background:var(--surface2)}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.fin-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-logo">AS <span>Frames</span></div>
-  <div class="header-sub">Upload your photo & place your order</div>
+<!-- PASSWORD SCREEN -->
+<div id="lockScreen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:90%;max-width:340px;text-align:center">
+    <div style="font-size:24px;font-weight:700;margin-bottom:.25rem">AS <span style="color:#D85A30">Frames</span></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">Enter password to continue</div>
+    <input id="pwInput" type="password" placeholder="Password" style="width:100%;padding:12px 14px;border:0.5px solid var(--border2);border-radius:10px;font-size:15px;text-align:center;margin-bottom:.75rem;background:var(--surface);color:var(--text)" onkeydown="if(event.key==='Enter')checkPw()">
+    <button onclick="checkPw()" style="width:100%;padding:12px;background:#D85A30;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer">Unlock Dashboard</button>
+    <div id="pwError" style="color:#993C1D;font-size:12px;margin-top:.6rem;display:none">Incorrect password. Try again.</div>
+  </div>
 </div>
 
-<div class="card">
-
-  <!-- Steps -->
-  <div class="steps">
-    <div class="step-dot active" id="dot1">1</div>
-    <div class="step-line" id="line1"></div>
-    <div class="step-dot" id="dot2">2</div>
-    <div class="step-line" id="line2"></div>
-    <div class="step-dot" id="dot3">3</div>
-  </div>
-
-  <!-- Section 1: Your Details -->
-  <div class="section active" id="sec1">
-    <div class="section-title">Your details</div>
-    <div class="section-sub">We'll use this to contact you on WhatsApp</div>
-    <div class="frow">
-      <label>Full name <span class="required">*</span></label>
-      <input id="i_name" type="text" placeholder="e.g. Ravi Kumar">
-      <div class="error-msg" id="err_name">Please enter your name</div>
-    </div>
-    <div class="frow">
-      <label>WhatsApp number <span class="required">*</span></label>
-      <input id="i_phone" type="tel" placeholder="e.g. 9876543210">
-      <div class="error-msg" id="err_phone">Please enter a valid 10-digit number</div>
-    </div>
-    <div class="frow">
-      <label>Your city</label>
-      <input id="i_city" type="text" placeholder="e.g. Anantapur">
-    </div>
-    <button class="btn-next" onclick="goTo(2)">Next →</button>
-  </div>
-
-  <!-- Section 2: Frame Details -->
-  <div class="section" id="sec2">
-    <div class="section-title">Frame details</div>
-    <div class="section-sub">Choose your frame size and add instructions</div>
-    <div class="frow">
-      <label>Frame size <span class="required">*</span></label>
-      <div class="size-grid">
-        <div class="size-card" onclick="selectSize(this,'4×6')"><div class="sz">4×6</div><div class="sz-label">Small</div></div>
-        <div class="size-card" onclick="selectSize(this,'5×7')"><div class="sz">5×7</div><div class="sz-label">Medium</div></div>
-        <div class="size-card" onclick="selectSize(this,'8×10')"><div class="sz">8×10</div><div class="sz-label">Large</div></div>
-        <div class="size-card" onclick="selectSize(this,'10×12')"><div class="sz">10×12</div><div class="sz-label">XL</div></div>
-        <div class="size-card" onclick="selectSize(this,'12×16')"><div class="sz">12×16</div><div class="sz-label">XXL</div></div>
-        <div class="size-card" onclick="selectSize(this,'Custom')"><div class="sz">Custom</div><div class="sz-label">Any size</div></div>
-      </div>
-      <div class="error-msg" id="err_size">Please select a frame size</div>
-    </div>
-    <div class="frow">
-      <label>Special instructions</label>
-      <textarea id="i_notes" placeholder="e.g. Black border, add name 'Ravi & Priya', matte finish..."></textarea>
-    </div>
-    <button class="btn-next" onclick="goTo(3)">Next →</button>
-    <button class="btn-back" onclick="goTo(1)">← Back</button>
-  </div>
-
-  <!-- Section 3: Upload Photo -->
-  <div class="section" id="sec3">
-    <div class="section-title">Upload your photo</div>
-    <div class="section-sub">Upload a clear, high-quality photo for best results</div>
-    <div class="upload-box" id="uploadBox">
-      <input type="file" id="i_photo" accept="image/*" onchange="previewPhoto(this)">
-      <div class="upload-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      </div>
-      <div class="upload-title">Tap to upload photo</div>
-      <div class="upload-sub">JPG, PNG supported • Max 10MB</div>
-      <img id="previewImg" class="preview-img">
-    </div>
-    <div class="preview-name" id="previewName"></div>
-    <div class="error-msg" id="err_photo">Please upload your photo</div>
-
-    <div style="background:#E6F1FB;border-radius:10px;padding:.85rem 1rem;margin:1rem 0;font-size:12px;color:#185FA5;line-height:1.6">
-      <strong>Tips for best results:</strong><br>
-      • Use a recent, clear photo<br>
-      • Avoid blurry or dark photos<br>
-      • Higher resolution = better print quality
-    </div>
-
-    <button class="btn-next" onclick="submitOrder()" id="submitBtn">Place Order</button>
-    <button class="btn-back" onclick="goTo(2)">← Back</button>
-  </div>
-
-  <!-- Success -->
-  <div class="section" id="secSuccess">
-    <div class="success">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <h2>Order placed!</h2>
-      <p>Thank you! We've received your order and will contact you on WhatsApp shortly to confirm the design.</p>
-      <a class="wa-btn" id="waConfirmBtn" href="#" target="_blank">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.138.564 4.14 1.534 5.876L0 24l6.317-1.508A11.956 11.956 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.034-1.384l-.36-.214-3.742.893.942-3.647-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
-        Chat with us on WhatsApp
-      </a>
-      <p style="font-size:12px;color:var(--text2)">Our WhatsApp: <strong>+91 94917 98928</strong></p>
-    </div>
-  </div>
-
+<!-- ALERT BAR -->
+<div class="alert-bar" id="alertBar">
+  <svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#fff" fill-opacity=".25"/><path d="M8 4v4M8 11v1" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+  <span id="alertMsg">New order received!</span>
+  <button onclick="closeAlert()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:18px;margin-left:8px">×</button>
 </div>
 
-<!-- WhatsApp float button -->
-<a class="wa-float" href="https://wa.me/919491798928?text=Hi%20AS%20Frames!%20I%20want%20to%20place%20a%20photo%20frame%20order." target="_blank" title="Chat on WhatsApp">
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.138.564 4.14 1.534 5.876L0 24l6.317-1.508A11.956 11.956 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.034-1.384l-.36-.214-3.742.893.942-3.647-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
-</a>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">AS <em>Frames</em></div>
+    <div class="sync-status"><span class="dot live" id="syncDot"></span><span id="syncLabel">Connected</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="syncFromSheet()">↻ Sync</button>
+      <button class="btn" style="border-color:#534AB7;color:#534AB7" onclick="openKhata()">Customer Khata</button>
+      <button class="btn primary" onclick="openModal('add')">+ New Order</button>
+    </div>
+  </div>
 
-<div class="footer">
-  AS Frames • Anantapur<br>
-  <a href="https://wa.me/919491798928">+91 94917 98928</a>
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total orders</div><div class="stat-val" id="sTotal">0</div></div>
+    <div class="stat"><div class="stat-label">Pending approval</div><div class="stat-val" id="sPending">0</div></div>
+    <div class="stat"><div class="stat-label">Collected</div><div class="stat-val" id="sCollected">₹0</div></div>
+    <div class="stat"><div class="stat-label">Balance due</div><div class="stat-val" id="sBalance">₹0</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Search name or phone…" oninput="render()">
+    <select id="filterStatus" onchange="render()">
+      <option value="">All statuses</option>
+      <option>New</option><option>Designing</option><option>Sent for Review</option>
+      <option>Approved</option><option>Printing</option><option>Ready</option><option>Delivered</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Customer</th><th>Phone</th><th>Size</th><th>Frame</th><th>Qty</th><th>Status</th>
+        <th>Amount</th><th>Advance</th><th>Balance</th><th>Payment</th><th>Last msg</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="addModal">
+<div class="modal">
+  <h2>New order</h2>
+  <div class="frow">
+    <label>Customer name</label>
+    <input id="f_name" type="text" placeholder="Ravi Kumar" onfocus="showRecents()" oninput="filterRecents(this.value)" autocomplete="off">
+    <div class="recent-list" id="recentList"></div>
+  </div>
+  <div class="frow"><label>WhatsApp number</label><input id="f_phone" type="text" placeholder="919876543210"></div>
+  <div class="frow"><label>Frame size</label>
+    <select id="f_size" onchange="toggleCustom('f')">
+      <option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option>
+    </select>
+  </div>
+  <div class="frow" id="f_custombox" style="display:none"><label>Custom size</label><input id="f_customsize" type="text" placeholder="e.g. 14×18 inches"></div>
+  <div class="frow"><label>Frame type</label>
+    <select id="f_frametype">
+      <option value="1 inch">1 inch</option><option value="1.5 inch">1.5 inch</option>
+      <option value="2 inch">2 inch</option><option value="3 inch">3 inch</option><option value="Custom">Custom</option>
+    </select>
+  </div>
+  <div class="frow"><label>Quantity</label>
+    <select id="f_qty"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+  </div>
+  <div class="frow"><label>Notes</label><textarea id="f_notes" placeholder="Design instructions, background colour, text…"></textarea></div>
+  <div class="fin-row">
+    <div class="frow" style="margin:0"><label>Total (₹)</label><input id="f_amount" type="number" placeholder="500" oninput="calcBal('f')"></div>
+    <div class="frow" style="margin:0"><label>Advance (₹)</label><input id="f_advance" type="number" placeholder="200" oninput="calcBal('f')"></div>
+    <div class="frow" style="margin:0"><label>Balance (₹)</label><input id="f_balance" type="number" readonly></div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal('add')">Cancel</button>
+    <button class="btn primary" onclick="addOrder()">Save Order</button>
+  </div>
+</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="overlay" id="editModal">
+<div class="modal">
+  <h2>Edit order</h2>
+  <input type="hidden" id="e_idx">
+  <div class="frow"><label>Customer name</label><input id="e_name" type="text"></div>
+  <div class="frow"><label>WhatsApp number</label><input id="e_phone" type="text"></div>
+  <div class="frow"><label>Frame size</label>
+    <select id="e_size" onchange="toggleCustom('e')">
+      <option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option>
+    </select>
+  </div>
+  <div class="frow" id="e_custombox" style="display:none"><label>Custom size</label><input id="e_customsize" type="text" placeholder="e.g. 14×18 inches"></div>
+  <div class="frow"><label>Frame type</label>
+    <select id="e_frametype">
+      <option value="1 inch">1 inch</option><option value="1.5 inch">1.5 inch</option>
+      <option value="2 inch">2 inch</option><option value="3 inch">3 inch</option><option value="Custom">Custom</option>
+    </select>
+  </div>
+  <div class="frow"><label>Quantity</label>
+    <select id="e_qty"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+  </div>
+  <div class="frow"><label>Status</label>
+    <select id="e_status">
+      <option>New</option><option>Designing</option><option>Sent for Review</option>
+      <option>Approved</option><option>Printing</option><option>Ready</option><option>Delivered</option>
+    </select>
+  </div>
+  <div class="frow"><label>Notes</label><textarea id="e_notes"></textarea></div>
+  <div class="fin-row">
+    <div class="frow" style="margin:0"><label>Total (₹)</label><input id="e_amount" type="number" oninput="calcBal('e')"></div>
+    <div class="frow" style="margin:0"><label>Advance (₹)</label><input id="e_advance" type="number" oninput="calcBal('e')"></div>
+    <div class="frow" style="margin:0"><label>Balance (₹)</label><input id="e_balance" type="number" readonly></div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal('edit')">Cancel</button>
+    <button class="btn primary" onclick="saveEdit()">Save Changes</button>
+  </div>
+</div>
+</div>
+
+<!-- KHATA MODAL -->
+<div class="overlay" id="khataModal">
+<div class="modal" style="max-width:620px">
+  <h2>Customer Khata</h2>
+  <div style="display:flex;gap:8px;margin-bottom:1rem">
+    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px" onkeydown="if(event.key==='Enter')doKhataSearch()">
+    <button class="btn primary" onclick="doKhataSearch()">Search</button>
+    <button class="btn" onclick="closeModal('khata')">Close</button>
+  </div>
+  <div id="khataResults"><p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Enter name or phone and click Search</p></div>
+</div>
 </div>
 
 <script>
-let selectedSize = '';
-let currentStep = 1;
+var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyBFptVsaCMS2I4zXCJjagr2k4Tfo06smELOUN7R5GdWPN3tGmpsV6ILvoUBJrQSOA9yQ/exec';
+var PASSWORD = 'Asframes@2024';
 
-function goTo(step) {
-  if (step > currentStep && !validate(currentStep)) return;
-  currentStep = step;
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('sec' + step).classList.add('active');
-  updateSteps(step);
-  window.scrollTo(0, 0);
-}
+var WA_MSGS = {
+  'Designing': 'Hi {name}! Your AS Frames order is being designed. We will send you a preview soon.',
+  'Sent for Review': 'Hi {name}! Your frame design is ready. Please check and share your feedback.',
+  'Approved': 'Hi {name}! Your design is approved. We are now printing your frame.',
+  'Printing': 'Hi {name}! Your frame is being printed and will be ready very soon.',
+  'Ready': 'Hi {name}! Your photo frame is READY! Please collect it. Balance due: Rs.{balance}.',
+  'Delivered': 'Hi {name}! Thank you for choosing AS Frames. Hope you love your frame!'
+};
+var REMIND = 'Hi {name}! Gentle reminder from AS Frames. Please let us know if you have any feedback. Thank you!';
 
-function updateSteps(step) {
-  for (let i = 1; i <= 3; i++) {
-    const dot = document.getElementById('dot' + i);
-    const line = document.getElementById('line' + i);
-    if (i < step) { dot.className = 'step-dot done'; dot.innerHTML = '✓'; }
-    else if (i === step) { dot.className = 'step-dot active'; dot.innerHTML = i; }
-    else { dot.className = 'step-dot'; dot.innerHTML = i; }
-    if (line) line.className = 'step-line' + (i < step ? ' done' : '');
+var orders = JSON.parse(localStorage.getItem('asf_orders') || '[]');
+var remindAt = JSON.parse(localStorage.getItem('asf_remind') || '{}');
+
+// PASSWORD
+function checkPw() {
+  var val = document.getElementById('pwInput').value;
+  if (val === PASSWORD) {
+    document.getElementById('lockScreen').style.display = 'none';
+    localStorage.setItem('asf_auth', PASSWORD);
+    syncFromSheet();
+  } else {
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
   }
 }
-
-function validate(step) {
-  if (step === 1) {
-    const name = document.getElementById('i_name').value.trim();
-    const phone = document.getElementById('i_phone').value.trim();
-    let ok = true;
-    if (!name) { document.getElementById('err_name').style.display = 'block'; ok = false; }
-    else document.getElementById('err_name').style.display = 'none';
-    if (!/^[0-9]{10}$/.test(phone)) { document.getElementById('err_phone').style.display = 'block'; ok = false; }
-    else document.getElementById('err_phone').style.display = 'none';
-    return ok;
-  }
-  if (step === 2) {
-    if (!selectedSize) { document.getElementById('err_size').style.display = 'block'; return false; }
-    document.getElementById('err_size').style.display = 'none';
-    return true;
-  }
-  return true;
+if (localStorage.getItem('asf_auth') === PASSWORD) {
+  document.getElementById('lockScreen').style.display = 'none';
+  syncFromSheet();
 }
 
-function selectSize(el, size) {
-  document.querySelectorAll('.size-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedSize = size;
-  document.getElementById('err_size').style.display = 'none';
-}
-
-function previewPhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = document.getElementById('previewImg');
-    img.src = e.target.result;
-    img.style.display = 'block';
-    document.getElementById('previewName').style.display = 'block';
-    document.getElementById('previewName').textContent = '✓ ' + file.name;
-    document.getElementById('uploadBox').style.borderColor = '#2d7a4f';
-  };
-  reader.readAsDataURL(file);
-}
-
-function submitOrder() {
-  const photo = document.getElementById('i_photo').files[0];
-  if (!photo) { document.getElementById('err_photo').style.display = 'block'; return; }
-  document.getElementById('err_photo').style.display = 'none';
-
-  const name  = document.getElementById('i_name').value.trim();
-  const phone = document.getElementById('i_phone').value.trim();
-  const city  = document.getElementById('i_city').value.trim();
-  const notes = document.getElementById('i_notes').value.trim();
-
-  const btn = document.getElementById('submitBtn');
-  btn.textContent = 'Submitting…';
-  btn.disabled = true;
-
-  // Send to Google Apps Script webhook
-  const WEBHOOK = 'https://script.google.com/macros/s/AKfycbx9Sf3LhsjsGjfcTEAbCb5oTAEYqU7Nyo6rAvGiPAhQWhUXHNjkxsXx8SxGkYbnIsDC8w/exec';
-  const order = {
-    id: Date.now(),
-    name, phone,
-    size: selectedSize,
-    notes: (city ? 'City: ' + city + ' | ' : '') + notes,
-    amount: 0, advance: 0, balance: 0,
-    status: 'New', fromPortal: true
-  };
-
-  // JSONP save to sheet
-  const cbName = 'portal_cb_' + Date.now();
-  const script = document.createElement('script');
-  script.src = WEBHOOK + '?action=save&callback=' + cbName + '&data=' + encodeURIComponent(JSON.stringify(order));
-  window[cbName] = function(res) {
-    document.body.removeChild(script);
+// SYNC
+function syncFromSheet() {
+  setSyncStatus(false);
+  document.getElementById('syncLabel').textContent = 'Syncing...';
+  var cbName = 'cb_' + Date.now();
+  var script = document.createElement('script');
+  script.src = WEBHOOK_URL + '?callback=' + cbName + '&t=' + Date.now();
+  window[cbName] = function(data) {
+    try { document.body.removeChild(script); } catch(e) {}
     delete window[cbName];
-    showSuccess(name, phone, notes);
+    if (data && data.success && data.orders && data.orders.length) {
+      var sheetIds = data.orders.map(function(o) { return String(o.id); });
+      var localOnly = orders.filter(function(o) { return sheetIds.indexOf(String(o.id)) === -1; });
+      orders = data.orders.map(function(o) {
+        return { id:o.id, name:o.name||'', phone:o.phone||'', size:o.size||'', frameType:o.frameType||'', qty:o.qty||1, notes:o.notes||'', amount:parseFloat(o.amount)||0, advance:parseFloat(o.advance)||0, balance:parseFloat(o.balance)||0, status:o.status||'New', lastMsg:o.lastMsg||null, created:o.created||Date.now(), fromPortal:o.fromPortal||false };
+      }).concat(localOnly);
+      saveLocal();
+      render();
+      updateStats();
+    }
+    setSyncStatus(true);
+    document.getElementById('syncLabel').textContent = 'Connected to Google Sheet';
   };
   script.onerror = function() {
-    document.body.removeChild(script);
+    try { document.body.removeChild(script); } catch(e) {}
     delete window[cbName];
-    showSuccess(name, phone, notes); // show success anyway — they can WhatsApp
+    setSyncStatus(true);
+    document.getElementById('syncLabel').textContent = 'Connected';
   };
   document.body.appendChild(script);
-
-  setTimeout(() => showSuccess(name, phone, notes), 4000); // fallback after 4s
+  setTimeout(function() {
+    setSyncStatus(true);
+    document.getElementById('syncLabel').textContent = 'Connected to Google Sheet';
+  }, 6000);
 }
 
-function showSuccess(name, phone, notes) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('secSuccess').classList.add('active');
-  // Pre-fill WhatsApp message
-  const msg = 'Hi AS Frames! I just placed an order.\nName: ' + name + '\nSize: ' + selectedSize + (notes ? '\nNotes: ' + notes : '');
-  document.getElementById('waConfirmBtn').href = 'https://wa.me/919491798928?text=' + encodeURIComponent(msg);
-  window.scrollTo(0, 0);
+function setSyncStatus(live) {
+  document.getElementById('syncDot').className = 'dot' + (live ? ' live' : '');
 }
 
-// Drag and drop
-const box = document.getElementById('uploadBox');
-box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('dragover'); });
-box.addEventListener('dragleave', () => box.classList.remove('dragover'));
-box.addEventListener('drop', e => {
-  e.preventDefault();
-  box.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    document.getElementById('i_photo').files = e.dataTransfer.files;
-    previewPhoto({ files: [file] });
+function pushToSheet(order) {
+  if (!WEBHOOK_URL) return;
+  var img = new Image();
+  img.src = WEBHOOK_URL + '?action=save&data=' + encodeURIComponent(JSON.stringify(order));
+}
+
+// STORAGE
+function saveLocal() { localStorage.setItem('asf_orders', JSON.stringify(orders)); }
+function saveRemind() { localStorage.setItem('asf_remind', JSON.stringify(remindAt)); }
+
+// RECENT CUSTOMERS
+function saveRecent(name, phone) {
+  var recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
+  recents = recents.filter(function(r) { return r.phone !== phone; });
+  recents.unshift({ name: name, phone: phone });
+  recents = recents.slice(0, 20);
+  localStorage.setItem('asf_recents', JSON.stringify(recents));
+}
+
+function showRecents() {
+  var recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
+  var list = document.getElementById('recentList');
+  if (!recents.length) { list.style.display = 'none'; return; }
+  list.innerHTML = recents.map(function(r) {
+    return '<div class="recent-item" onclick="fillCustomer(\'' + r.name.replace(/'/g, '') + '\',\'' + r.phone + '\')">' +
+      '<span>' + r.name + '</span><span style="color:var(--text2);font-size:12px">' + r.phone + '</span></div>';
+  }).join('');
+  list.style.display = 'block';
+}
+
+function filterRecents(q) {
+  var recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
+  var list = document.getElementById('recentList');
+  if (!q) { showRecents(); return; }
+  var filtered = recents.filter(function(r) {
+    return r.name.toLowerCase().indexOf(q.toLowerCase()) !== -1 || r.phone.indexOf(q) !== -1;
+  });
+  if (!filtered.length) { list.style.display = 'none'; return; }
+  list.innerHTML = filtered.map(function(r) {
+    return '<div class="recent-item" onclick="fillCustomer(\'' + r.name.replace(/'/g, '') + '\',\'' + r.phone + '\')">' +
+      '<span>' + r.name + '</span><span style="color:var(--text2);font-size:12px">' + r.phone + '</span></div>';
+  }).join('');
+  list.style.display = 'block';
+}
+
+function fillCustomer(name, phone) {
+  document.getElementById('f_name').value = name;
+  document.getElementById('f_phone').value = phone;
+  document.getElementById('recentList').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  var list = document.getElementById('recentList');
+  if (list && !list.contains(e.target) && e.target.id !== 'f_name') {
+    list.style.display = 'none';
   }
 });
+
+// CALCULATIONS
+function calcBal(p) {
+  var a = parseFloat(document.getElementById(p + '_amount').value) || 0;
+  var adv = parseFloat(document.getElementById(p + '_advance').value) || 0;
+  document.getElementById(p + '_balance').value = Math.max(0, a - adv);
+}
+
+function toggleCustom(p) {
+  var val = document.getElementById(p + '_size').value;
+  var box = document.getElementById(p + '_custombox');
+  if (val === 'Custom') { box.style.display = 'block'; document.getElementById(p + '_customsize').focus(); }
+  else { box.style.display = 'none'; document.getElementById(p + '_customsize').value = ''; }
+}
+
+// MODALS
+function openModal(id) { document.getElementById(id + 'Modal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id + 'Modal').classList.remove('open'); }
+
+// ADD ORDER
+function addOrder() {
+  var name = document.getElementById('f_name').value.trim();
+  var phone = document.getElementById('f_phone').value.trim();
+  if (!name || !phone) { alert('Name and phone are required.'); return; }
+  var amount = parseFloat(document.getElementById('f_amount').value) || 0;
+  var advance = parseFloat(document.getElementById('f_advance').value) || 0;
+  var fsize = document.getElementById('f_size').value;
+  var fcustom = document.getElementById('f_customsize').value.trim();
+  var finalSize = (fsize === 'Custom' && fcustom) ? 'Custom: ' + fcustom : fsize;
+  var o = {
+    id: Date.now(), name: name, phone: phone,
+    size: finalSize,
+    frameType: document.getElementById('f_frametype').value,
+    qty: document.getElementById('f_qty').value,
+    notes: document.getElementById('f_notes').value,
+    status: 'New', amount: amount, advance: advance,
+    balance: Math.max(0, amount - advance),
+    lastMsg: null, created: Date.now(), fromPortal: false
+  };
+  orders.unshift(o);
+  saveLocal();
+  saveRecent(name, phone);
+  pushToSheet(o);
+  closeModal('add');
+  document.getElementById('f_name').value = '';
+  document.getElementById('f_phone').value = '';
+  document.getElementById('f_notes').value = '';
+  document.getElementById('f_amount').value = '';
+  document.getElementById('f_advance').value = '';
+  document.getElementById('f_balance').value = '';
+  document.getElementById('f_customsize').value = '';
+  document.getElementById('f_qty').value = '1';
+  document.getElementById('f_frametype').value = '1 inch';
+  document.getElementById('f_custombox').style.display = 'none';
+  render();
+  updateStats();
+  playAlert();
+  showAlert('Order added for ' + name + '!');
+}
+
+// EDIT ORDER
+function openEdit(idx) {
+  var o = orders[idx];
+  document.getElementById('e_idx').value = idx;
+  document.getElementById('e_name').value = o.name;
+  document.getElementById('e_phone').value = o.phone;
+  document.getElementById('e_status').value = o.status;
+  document.getElementById('e_notes').value = o.notes || '';
+  document.getElementById('e_qty').value = o.qty || '1';
+  document.getElementById('e_frametype').value = o.frameType || '1 inch';
+  document.getElementById('e_amount').value = o.amount || 0;
+  document.getElementById('e_advance').value = o.advance || 0;
+  document.getElementById('e_balance').value = o.balance || 0;
+  if (o.size && o.size.indexOf('Custom:') === 0) {
+    document.getElementById('e_size').value = 'Custom';
+    document.getElementById('e_custombox').style.display = 'block';
+    document.getElementById('e_customsize').value = o.size.replace('Custom: ', '');
+  } else {
+    document.getElementById('e_size').value = o.size || '4×6';
+    document.getElementById('e_custombox').style.display = 'none';
+    document.getElementById('e_customsize').value = '';
+  }
+  openModal('edit');
+}
+
+function saveEdit() {
+  var idx = parseInt(document.getElementById('e_idx').value);
+  var oldStatus = orders[idx].status;
+  var newStatus = document.getElementById('e_status').value;
+  var esize = document.getElementById('e_size').value;
+  var ecustom = document.getElementById('e_customsize').value.trim();
+  var eFinalSize = (esize === 'Custom' && ecustom) ? 'Custom: ' + ecustom : esize;
+  var amt = parseFloat(document.getElementById('e_amount').value) || 0;
+  var adv = parseFloat(document.getElementById('e_advance').value) || 0;
+  orders[idx].name = document.getElementById('e_name').value;
+  orders[idx].phone = document.getElementById('e_phone').value;
+  orders[idx].size = eFinalSize;
+  orders[idx].frameType = document.getElementById('e_frametype').value;
+  orders[idx].qty = document.getElementById('e_qty').value;
+  orders[idx].status = newStatus;
+  orders[idx].notes = document.getElementById('e_notes').value;
+  orders[idx].amount = amt;
+  orders[idx].advance = adv;
+  orders[idx].balance = Math.max(0, amt - adv);
+  saveLocal();
+  pushToSheet(orders[idx]);
+  closeModal('edit');
+  if (oldStatus !== newStatus && WA_MSGS[newStatus]) {
+    setTimeout(function() { sendStatusWA(idx); }, 200);
+  }
+  render();
+  updateStats();
+}
+
+// DELETE
+function deleteOrder(idx) {
+  var o = orders[idx];
+  if (!confirm('Delete order for ' + o.name + '? This cannot be undone.')) return;
+  orders.splice(idx, 1);
+  saveLocal();
+  render();
+  updateStats();
+}
+
+// WHATSAPP
+function sendStatusWA(idx) {
+  var o = orders[idx];
+  var msg = (WA_MSGS[o.status] || '').replace(/{name}/g, o.name).replace('{balance}', o.balance);
+  orders[idx].lastMsg = Date.now();
+  saveLocal();
+  window.open('https://wa.me/' + o.phone + '?text=' + encodeURIComponent(msg), '_blank');
+  render();
+}
+
+function openRemind(idx) {
+  var o = orders[idx];
+  var msg = REMIND.replace('{name}', o.name);
+  orders[idx].lastMsg = Date.now();
+  remindAt[idx] = Date.now();
+  saveLocal();
+  saveRemind();
+  window.open('https://wa.me/' + o.phone + '?text=' + encodeURIComponent(msg), '_blank');
+  render();
+}
+
+// TIME
+function timeSince(ts) {
+  if (!ts) return 'Never';
+  var s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return s + 's ago';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  return Math.floor(s / 3600) + 'h ago';
+}
+
+// RENDER
+function render() {
+  var q = document.getElementById('searchBox').value.toLowerCase();
+  var sf = document.getElementById('filterStatus').value;
+  var tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  var filtered = orders.filter(function(o) {
+    return (!q || (o.name||'').toLowerCase().indexOf(q) !== -1 || (o.phone||'').indexOf(q) !== -1) &&
+           (!sf || o.status === sf);
+  });
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:2.5rem;color:var(--text2);font-size:13px">No orders. Click "+ New Order" to add one.</td></tr>';
+    return;
+  }
+  filtered.forEach(function(o) {
+    var idx = orders.indexOf(o);
+    var minsAgo = o.lastMsg ? Math.floor((Date.now() - o.lastMsg) / 60000) : 9999;
+    var urgent = minsAgo >= 120 && o.status !== 'Delivered';
+    var sc = ('s-' + o.status).replace(/ /g, '-');
+    var bal = parseFloat(o.balance) || 0;
+    var payHtml = bal === 0
+      ? '<span style="background:#EAF3DE;color:#2d7a4f;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">Paid</span>'
+      : '<span style="background:#FAECE7;color:#993C1D;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">₹' + bal + ' left</span>';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="color:var(--text2);font-size:12px">#' + o.id + '</td>' +
+      '<td style="font-weight:500">' + o.name + (o.fromPortal ? '<span class="portal-tag">portal</span>' : '') +
+        (o.notes ? '<br><span style="font-size:11px;color:var(--text2)">' + (o.notes||'').substring(0, 35) + (o.notes.length > 35 ? '…' : '') + '</span>' : '') + '</td>' +
+      '<td style="color:var(--text2)">' + o.phone + '</td>' +
+      '<td>' + (o.size || '-') + '</td>' +
+      '<td style="color:var(--text2);font-size:12px">' + (o.frameType || '-') + '</td>' +
+      '<td style="text-align:center">' + (o.qty || 1) + '</td>' +
+      '<td><span class="pill ' + sc + '">' + o.status + '</span></td>' +
+      '<td>₹' + o.amount + '</td>' +
+      '<td style="color:var(--green)">₹' + o.advance + '</td>' +
+      '<td style="color:' + (bal > 0 ? 'var(--red)' : 'var(--green)') + '">₹' + bal + '</td>' +
+      '<td>' + payHtml + '</td>' +
+      '<td><span class="timer ' + (urgent ? 'urgent' : '') + '">' + timeSince(o.lastMsg) + '</span></td>' +
+      '<td class="actions">' +
+        '<button class="btn sm" onclick="openEdit(' + idx + ')">Edit</button>' +
+        '<button class="btn sm wa" onclick="sendStatusWA(' + idx + ')">WA</button>' +
+        '<button class="btn sm remind" onclick="openRemind(' + idx + ')">Remind</button>' +
+        '<button class="btn sm" style="border-color:#993C1D;color:#993C1D" onclick="deleteOrder(' + idx + ')">Del</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+// STATS
+function updateStats() {
+  document.getElementById('sTotal').textContent = orders.length;
+  document.getElementById('sPending').textContent = orders.filter(function(o) { return o.status === 'Sent for Review' || o.status === 'Designing'; }).length;
+  document.getElementById('sCollected').textContent = '₹' + orders.reduce(function(a, o) { return a + (parseFloat(o.advance) || 0); }, 0).toLocaleString('en-IN');
+  document.getElementById('sBalance').textContent = '₹' + orders.reduce(function(a, o) { return a + (parseFloat(o.balance) || 0); }, 0).toLocaleString('en-IN');
+}
+
+// ALERT SOUND
+function playAlert() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.18, 0.36].forEach(function(t) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 900; o.type = 'sine';
+      g.gain.setValueAtTime(0.3, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.22);
+      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.25);
+    });
+  } catch(e) {}
+}
+
+function showAlert(msg) {
+  document.getElementById('alertMsg').textContent = msg;
+  document.getElementById('alertBar').classList.add('show');
+  playAlert();
+  if (Notification.permission === 'granted') new Notification('AS Frames', { body: msg });
+  else if (Notification.permission !== 'denied') Notification.requestPermission();
+  setTimeout(closeAlert, 8000);
+}
+function closeAlert() { document.getElementById('alertBar').classList.remove('show'); }
+
+// AUTO REMIND
+setInterval(function() {
+  render();
+  orders.forEach(function(o, idx) {
+    if (o.status === 'Delivered') return;
+    var last = remindAt[idx] || o.lastMsg || o.created;
+    var mins = Math.floor((Date.now() - last) / 60000);
+    if (mins >= 120) {
+      remindAt[idx] = Date.now();
+      saveRemind();
+      showAlert('Reminder due: ' + o.name + ' has not responded in 2+ hours!');
+    }
+  });
+}, 30000);
+
+// KHATA
+function openKhata() {
+  var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
+  var total = Math.max(orders.length, saved.length);
+  document.getElementById('khataSearch').value = '';
+  document.getElementById('khataResults').innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ ' + total + ' orders ready. Enter name or phone and click Search</p>';
+  openModal('khata');
+  setTimeout(function() { document.getElementById('khataSearch').focus(); }, 200);
+}
+
+function doKhataSearch() {
+  var q = document.getElementById('khataSearch').value.trim().toLowerCase();
+  var resultsDiv = document.getElementById('khataResults');
+  if (!q) { resultsDiv.innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Please type a name or phone number</p>'; return; }
+  // Always use freshest data from localStorage + current session
+  var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
+  var allOrders = saved.slice();
+  orders.forEach(function(o) {
+    if (!allOrders.find(function(m) { return String(m.id) === String(o.id); })) allOrders.push(o);
+  });
+  var matched = allOrders.filter(function(o) {
+    return (o.name || '').toLowerCase().indexOf(q) !== -1 || (o.phone || '').indexOf(q) !== -1;
+  });
+  if (!matched.length) { resultsDiv.innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">No customer found for "' + q + '"</p>'; return; }
+  var customers = {};
+  matched.forEach(function(o) {
+    var key = o.phone || o.name;
+    if (!customers[key]) customers[key] = { name: o.name, phone: o.phone, orders: [] };
+    customers[key].orders.push(o);
+  });
+  var html = '';
+  Object.values(customers).forEach(function(c) {
+    var totalAmt = c.orders.reduce(function(a, o) { return a + (parseFloat(o.amount) || 0); }, 0);
+    var totalPaid = c.orders.reduce(function(a, o) { return a + (parseFloat(o.advance) || 0); }, 0);
+    var totalBal = c.orders.reduce(function(a, o) { return a + (parseFloat(o.balance) || 0); }, 0);
+    html += '<div style="background:var(--surface2);border-radius:var(--radius);padding:1rem;margin-bottom:1rem">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">';
+    html += '<div><div style="font-size:16px;font-weight:600">' + c.name + '</div><div style="font-size:12px;color:var(--text2)">' + c.phone + '</div></div>';
+    html += '<a href="https://wa.me/' + c.phone + '" target="_blank" style="background:#128C7E;color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;text-decoration:none">WhatsApp</a>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:.75rem">';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">TOTAL</div><div style="font-size:16px;font-weight:600">₹' + totalAmt.toLocaleString('en-IN') + '</div></div>';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">PAID</div><div style="font-size:16px;font-weight:600;color:#2d7a4f">₹' + totalPaid.toLocaleString('en-IN') + '</div></div>';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">PENDING</div><div style="font-size:16px;font-weight:600;color:' + (totalBal > 0 ? '#993C1D' : '#2d7a4f') + '">₹' + totalBal.toLocaleString('en-IN') + '</div></div>';
+    html += '</div>';
+    html += '<div style="background:var(--surface);border-radius:8px;overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+    html += '<thead><tr style="background:var(--surface2)"><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">#</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Size</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Frame</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Qty</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Status</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Amount</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Paid</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Pending</th></tr></thead><tbody>';
+    c.orders.forEach(function(o, i) {
+      var bal = parseFloat(o.balance) || 0;
+      var sc = 's-' + o.status.replace(/ /g, '-');
+      html += '<tr style="border-top:0.5px solid var(--border)">';
+      html += '<td style="padding:7px 8px;color:var(--text2)">' + (i + 1) + '</td>';
+      html += '<td style="padding:7px 8px">' + (o.size || '-') + '</td>';
+      html += '<td style="padding:7px 8px;color:var(--text2)">' + (o.frameType || '-') + '</td>';
+      html += '<td style="padding:7px 8px;text-align:center">' + (o.qty || 1) + '</td>';
+      html += '<td style="padding:7px 8px"><span class="pill ' + sc + '">' + o.status + '</span></td>';
+      html += '<td style="padding:7px 8px;text-align:right">₹' + (parseFloat(o.amount) || 0).toLocaleString('en-IN') + '</td>';
+      html += '<td style="padding:7px 8px;text-align:right;color:#2d7a4f">₹' + (parseFloat(o.advance) || 0).toLocaleString('en-IN') + '</td>';
+      html += '<td style="padding:7px 8px;text-align:right;color:' + (bal > 0 ? '#993C1D' : '#2d7a4f') + '">₹' + bal.toLocaleString('en-IN') + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    if (totalBal > 0) {
+      var waMsg = encodeURIComponent('Hi ' + c.name + '! You have a pending balance of Rs.' + totalBal + ' at AS Frames. Kindly clear the payment. Thank you!');
+      html += '<div style="margin-top:.75rem;background:#FAECE7;border-radius:8px;padding:.6rem 1rem;font-size:12px;color:#993C1D;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">';
+      html += '<span>Pending: <strong>₹' + totalBal.toLocaleString('en-IN') + '</strong></span>';
+      html += '<a href="https://wa.me/' + c.phone + '?text=' + waMsg + '" target="_blank" style="background:#993C1D;color:#fff;padding:4px 12px;border-radius:6px;font-size:11px;text-decoration:none">Send Reminder</a>';
+      html += '</div>';
+    } else {
+      html += '<div style="margin-top:.75rem;background:#EAF3DE;border-radius:8px;padding:.6rem 1rem;font-size:12px;color:#2d7a4f">Fully paid!</div>';
+    }
+    html += '</div>';
+  });
+  resultsDiv.innerHTML = html;
+}
+
+render();
+updateStats();
 </script>
 </body>
 </html>
