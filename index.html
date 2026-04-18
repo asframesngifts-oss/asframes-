@@ -223,7 +223,7 @@ tbody td{padding:8px 10px;vertical-align:middle}
 <div class="modal" style="max-width:620px">
   <h2>Customer Khata</h2>
   <div style="display:flex;gap:8px;margin-bottom:1rem">
-    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px">
+    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px" onkeydown="if(event.key==='Enter')doKhataSearch()">
     <button class="btn primary" onclick="doKhataSearch()">Search</button>
     <button class="btn" onclick="closeModal('khata')">Close</button>
   </div>
@@ -253,7 +253,9 @@ function checkPw() {
   var val = document.getElementById('pwInput').value;
   if (val === PASSWORD) {
     document.getElementById('lockScreen').style.display = 'none';
+    sessionStorage.setItem('asf_session', PASSWORD);
     localStorage.setItem('asf_auth', PASSWORD);
+    resetIdle();
     syncFromSheet();
   } else {
     document.getElementById('pwError').style.display = 'block';
@@ -261,9 +263,29 @@ function checkPw() {
     document.getElementById('pwInput').focus();
   }
 }
-if (localStorage.getItem('asf_auth') === PASSWORD) {
+// Ask password on every page load (refresh = ask again)
+// Also idle timeout after 2 minutes
+var idleTimer;
+function resetIdle() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(function() {
+    // Lock after 2 mins idle
+    document.getElementById('lockScreen').style.display = 'flex';
+    localStorage.removeItem('asf_auth');
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwError').style.display = 'none';
+  }, 2 * 60 * 1000);
+}
+document.addEventListener('mousemove', resetIdle);
+document.addEventListener('keypress', resetIdle);
+document.addEventListener('click', resetIdle);
+document.addEventListener('touchstart', resetIdle);
+
+// Check session - only valid within same tab session
+if (sessionStorage.getItem('asf_session') === PASSWORD) {
   document.getElementById('lockScreen').style.display = 'none';
   syncFromSheet();
+  resetIdle();
 }
 
 // SYNC
@@ -615,8 +637,10 @@ setInterval(function() {
 
 // KHATA
 function openKhata() {
+  var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
+  var total = Math.max(orders.length, saved.length);
   document.getElementById('khataSearch').value = '';
-  document.getElementById('khataResults').innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">' + orders.length + ' orders loaded. Enter name or phone and click Search</p>';
+  document.getElementById('khataResults').innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ ' + total + ' orders ready. Enter name or phone and click Search</p>';
   openModal('khata');
   setTimeout(function() { document.getElementById('khataSearch').focus(); }, 200);
 }
@@ -625,7 +649,15 @@ function doKhataSearch() {
   var q = document.getElementById('khataSearch').value.trim().toLowerCase();
   var resultsDiv = document.getElementById('khataResults');
   if (!q) { resultsDiv.innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Please type a name or phone number</p>'; return; }
-  var matched = orders.filter(function(o) {
+  // Always use freshest data from localStorage + current session
+  var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
+  var allOrders = saved.slice();
+  orders.forEach(function(o) {
+    var exists = false;
+    for(var j=0;j<allOrders.length;j++){ if(String(allOrders[j].id)===String(o.id)){exists=true;break;} }
+    if(!exists) allOrders.push(o);
+  });
+  var matched = allOrders.filter(function(o) {
     return (o.name || '').toLowerCase().indexOf(q) !== -1 || (o.phone || '').indexOf(q) !== -1;
   });
   if (!matched.length) { resultsDiv.innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">No customer found for "' + q + '"</p>'; return; }
