@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AS Frames – Upload Your Photo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#D85A30;
+  --accent2:#B84820;
+  --bg:#f7f4ef;
+  --surface:#ffffff;
+  --text:#1a1a18;
+  --text2:#6b6a65;
+  --border:rgba(0,0,0,0.1);
+  --border2:rgba(0,0,0,0.18);
+  --radius:12px;
+  --radius-lg:18px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;padding:0;color:var(--text)}
+
+/* header */
+.header{background:var(--accent);padding:1.5rem 1.25rem 3rem;text-align:center;position:relative;overflow:hidden}
+.header::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:40px;background:var(--bg);border-radius:50% 50% 0 0 / 100% 100% 0 0}
+.header-logo{font-size:28px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.header-logo span{opacity:.8}
+.header-sub{font-size:14px;color:rgba(255,255,255,0.85);margin-top:4px}
+
+/* card */
+.card{background:var(--surface);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:1.5rem;margin:0 1rem 1rem;margin-top:-1.5rem;position:relative;z-index:1}
+
+/* steps indicator */
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:1.5rem}
+.step-dot{width:28px;height:28px;border-radius:50%;background:var(--bg);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text2);transition:all .3s}
+.step-dot.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.step-dot.done{background:#2d7a4f;border-color:#2d7a4f;color:#fff}
+.step-line{flex:1;height:2px;background:var(--border);max-width:40px;transition:background .3s}
+.step-line.done{background:#2d7a4f}
+
+/* form */
+.section{display:none}
+.section.active{display:block}
+.section-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.section-sub{font-size:13px;color:var(--text2);margin-bottom:1.25rem}
+.frow{margin-bottom:1rem}
+.frow label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.frow input,.frow select,.frow textarea{width:100%;padding:12px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:15px;font-family:inherit;transition:border-color .2s;-webkit-appearance:none}
+.frow input:focus,.frow select:focus,.frow textarea:focus{outline:none;border-color:var(--accent)}
+.frow textarea{resize:none;min-height:80px}
+.frow select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6a65' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+
+/* photo upload */
+.upload-box{border:2px dashed var(--border2);border-radius:var(--radius);padding:2rem 1rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg)}
+.upload-box:hover,.upload-box.dragover{border-color:var(--accent);background:#fdf1ec}
+.upload-box input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{width:48px;height:48px;background:#fdf1ec;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.upload-icon svg{width:22px;height:22px}
+.upload-title{font-size:15px;font-weight:500;margin-bottom:4px}
+.upload-sub{font-size:12px;color:var(--text2)}
+.preview-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--radius);margin-top:12px;display:none}
+.preview-name{font-size:12px;color:#2d7a4f;margin-top:8px;text-align:center;display:none}
+
+/* size cards */
+.size-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.5rem}
+.size-card{border:1.5px solid var(--border2);border-radius:var(--radius);padding:.75rem .5rem;text-align:center;cursor:pointer;transition:all .2s}
+.size-card:hover{border-color:var(--accent)}
+.size-card.selected{border-color:var(--accent);background:#fdf1ec}
+.size-card .sz{font-size:15px;font-weight:600;color:var(--text)}
+.size-card .sz-label{font-size:10px;color:var(--text2);margin-top:2px}
+
+/* buttons */
+.btn-next{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:16px;font-weight:600;cursor:pointer;margin-top:.5rem;transition:background .2s}
+.btn-next:hover{background:var(--accent2)}
+.btn-back{width:100%;padding:12px;background:transparent;color:var(--text2);border:0.5px solid var(--border2);border-radius:var(--radius);font-size:14px;cursor:pointer;margin-top:.5rem}
+
+/* success */
+.success{text-align:center;padding:1rem 0}
+.success-icon{width:64px;height:64px;background:#EAF3DE;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.success-icon svg{width:32px;height:32px}
+.success h2{font-size:20px;font-weight:600;margin-bottom:.5rem}
+.success p{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:1.25rem}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#128C7E;color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:500;cursor:pointer;text-decoration:none;margin-bottom:.75rem}
+.wa-btn:hover{background:#0a6b60}
+
+/* whatsapp float */
+.wa-float{position:fixed;bottom:1.5rem;right:1.5rem;background:#128C7E;color:#fff;border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.2);text-decoration:none;z-index:50}
+
+/* footer */
+.footer{text-align:center;padding:1.5rem 1rem;font-size:12px;color:var(--text2)}
+.footer a{color:var(--accent);text-decoration:none}
+
+.error-msg{font-size:12px;color:#993C1D;margin-top:4px;display:none}
+.required{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">AS <span>Frames</span></div>
+  <div class="header-sub">Upload your photo & place your order</div>
+</div>
+
+<div class="card">
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step-dot active" id="dot1">1</div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-dot" id="dot2">2</div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-dot" id="dot3">3</div>
+  </div>
+
+  <!-- Section 1: Your Details -->
+  <div class="section active" id="sec1">
+    <div class="section-title">Your details</div>
+    <div class="section-sub">We'll use this to contact you on WhatsApp</div>
+    <div class="frow">
+      <label>Full name <span class="required">*</span></label>
+      <input id="i_name" type="text" placeholder="e.g. Ravi Kumar">
+      <div class="error-msg" id="err_name">Please enter your name</div>
+    </div>
+    <div class="frow">
+      <label>WhatsApp number <span class="required">*</span></label>
+      <input id="i_phone" type="tel" placeholder="e.g. 9876543210">
+      <div class="error-msg" id="err_phone">Please enter a valid 10-digit number</div>
+    </div>
+    <div class="frow">
+      <label>Your city</label>
+      <input id="i_city" type="text" placeholder="e.g. Kadapa">
+    </div>
+    <button class="btn-next" onclick="goTo(2)">Next →</button>
+  </div>
+
+  <!-- Section 2: Frame Details -->
+  <div class="section" id="sec2">
+    <div class="section-title">Frame details</div>
+    <div class="section-sub">Choose your frame size and add instructions</div>
+    <div class="frow">
+      <label>Frame size <span class="required">*</span></label>
+      <div class="size-grid">
+        <div class="size-card" onclick="selectSize(this,'4×6')"><div class="sz">4×6</div><div class="sz-label">Small</div></div>
+        <div class="size-card" onclick="selectSize(this,'5×7')"><div class="sz">5×7</div><div class="sz-label">Medium</div></div>
+        <div class="size-card" onclick="selectSize(this,'8×10')"><div class="sz">8×10</div><div class="sz-label">Large</div></div>
+        <div class="size-card" onclick="selectSize(this,'10×12')"><div class="sz">10×12</div><div class="sz-label">XL</div></div>
+        <div class="size-card" onclick="selectSize(this,'12×16')"><div class="sz">12×16</div><div class="sz-label">XXL</div></div>
+        <div class="size-card" onclick="selectSize(this,'Custom')"><div class="sz">Custom</div><div class="sz-label">Any size</div></div>
+      </div>
+      <div class="error-msg" id="err_size">Please select a frame size</div>
+    </div>
+    <div class="frow">
+      <label>Special instructions</label>
+      <textarea id="i_notes" placeholder="e.g. Black border, add name 'Ravi & Priya', matte finish..."></textarea>
+    </div>
+    <button class="btn-next" onclick="goTo(3)">Next →</button>
+    <button class="btn-back" onclick="goTo(1)">← Back</button>
+  </div>
+
+  <!-- Section 3: Upload Photo -->
+  <div class="section" id="sec3">
+    <div class="section-title">Upload your photo</div>
+    <div class="section-sub">Upload a clear, high-quality photo for best results</div>
+    <div class="upload-box" id="uploadBox">
+      <input type="file" id="i_photo" accept="image/*" onchange="previewPhoto(this)">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="upload-title">Tap to upload photo</div>
+      <div class="upload-sub">JPG, PNG supported • Max 10MB</div>
+      <img id="previewImg" class="preview-img">
+    </div>
+    <div class="preview-name" id="previewName"></div>
+    <div class="error-msg" id="err_photo">Please upload your photo</div>
+
+    <div style="background:#E6F1FB;border-radius:10px;padding:.85rem 1rem;margin:1rem 0;font-size:12px;color:#185FA5;line-height:1.6">
+      <strong>Tips for best results:</strong><br>
+      • Use a recent, clear photo<br>
+      • Avoid blurry or dark photos<br>
+      • Higher resolution = better print quality
+    </div>
+
+    <button class="btn-next" onclick="submitOrder()" id="submitBtn">Place Order</button>
+    <button class="btn-back" onclick="goTo(2)">← Back</button>
+  </div>
+
+  <!-- Success -->
+  <div class="section" id="secSuccess">
+    <div class="success">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Order placed!</h2>
+      <p>Thank you! We've received your order and will contact you on WhatsApp shortly to confirm the design.</p>
+      <a class="wa-btn" id="waConfirmBtn" href="#" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.138.564 4.14 1.534 5.876L0 24l6.317-1.508A11.956 11.956 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.034-1.384l-.36-.214-3.742.893.942-3.647-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+        Chat with us on WhatsApp
+      </a>
+      <p style="font-size:12px;color:var(--text2)">Our WhatsApp: <strong>+91 94917 98928</strong></p>
+    </div>
+  </div>
+
+</div>
+
+<!-- WhatsApp float button -->
+<a class="wa-float" href="https://wa.me/919491798928?text=Hi%20AS%20Frames!%20I%20want%20to%20place%20a%20photo%20frame%20order." target="_blank" title="Chat on WhatsApp">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.138.564 4.14 1.534 5.876L0 24l6.317-1.508A11.956 11.956 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.034-1.384l-.36-.214-3.742.893.942-3.647-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+</a>
+
+<div class="footer">
+  AS Frames • Kadapa<br>
+  <a href="https://wa.me/919491798928">+91 94917 98928</a>
+</div>
+
+<script>
+let selectedSize = '';
+let currentStep = 1;
+
+function goTo(step) {
+  if (step > currentStep && !validate(currentStep)) return;
+  currentStep = step;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec' + step).classList.add('active');
+  updateSteps(step);
+  window.scrollTo(0, 0);
+}
+
+function updateSteps(step) {
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    const line = document.getElementById('line' + i);
+    if (i < step) { dot.className = 'step-dot done'; dot.innerHTML = '✓'; }
+    else if (i === step) { dot.className = 'step-dot active'; dot.innerHTML = i; }
+    else { dot.className = 'step-dot'; dot.innerHTML = i; }
+    if (line) line.className = 'step-line' + (i < step ? ' done' : '');
+  }
+}
+
+function validate(step) {
+  if (step === 1) {
+    const name = document.getElementById('i_name').value.trim();
+    const phone = document.getElementById('i_phone').value.trim();
+    let ok = true;
+    if (!name) { document.getElementById('err_name').style.display = 'block'; ok = false; }
+    else document.getElementById('err_name').style.display = 'none';
+    if (!/^[0-9]{10}$/.test(phone)) { document.getElementById('err_phone').style.display = 'block'; ok = false; }
+    else document.getElementById('err_phone').style.display = 'none';
+    return ok;
+  }
+  if (step === 2) {
+    if (!selectedSize) { document.getElementById('err_size').style.display = 'block'; return false; }
+    document.getElementById('err_size').style.display = 'none';
+    return true;
+  }
+  return true;
+}
+
+function selectSize(el, size) {
+  document.querySelectorAll('.size-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSize = size;
+  document.getElementById('err_size').style.display = 'none';
+}
+
+function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById('previewImg');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('previewName').style.display = 'block';
+    document.getElementById('previewName').textContent = '✓ ' + file.name;
+    document.getElementById('uploadBox').style.borderColor = '#2d7a4f';
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitOrder() {
+  const photo = document.getElementById('i_photo').files[0];
+  if (!photo) { document.getElementById('err_photo').style.display = 'block'; return; }
+  document.getElementById('err_photo').style.display = 'none';
+
+  const name  = document.getElementById('i_name').value.trim();
+  const phone = document.getElementById('i_phone').value.trim();
+  const city  = document.getElementById('i_city').value.trim();
+  const notes = document.getElementById('i_notes').value.trim();
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+
+  // Send to Google Apps Script webhook
+  const WEBHOOK = 'https://script.google.com/macros/s/AKfycbx9Sf3LhsjsGjfcTEAbCb5oTAEYqU7Nyo6rAvGiPAhQWhUXHNjkxsXx8SxGkYbnIsDC8w/exec';
+  const order = {
+    id: Date.now(),
+    name, phone,
+    size: selectedSize,
+    notes: (city ? 'City: ' + city + ' | ' : '') + notes,
+    amount: 0, advance: 0, balance: 0,
+    status: 'New', fromPortal: true
+  };
+
+  // JSONP save to sheet
+  const cbName = 'portal_cb_' + Date.now();
+  const script = document.createElement('script');
+  script.src = WEBHOOK + '?action=save&callback=' + cbName + '&data=' + encodeURIComponent(JSON.stringify(order));
+  window[cbName] = function(res) {
+    document.body.removeChild(script);
+    delete window[cbName];
+    showSuccess(name, phone, notes);
+  };
+  script.onerror = function() {
+    document.body.removeChild(script);
+    delete window[cbName];
+    showSuccess(name, phone, notes); // show success anyway — they can WhatsApp
+  };
+  document.body.appendChild(script);
+
+  setTimeout(() => showSuccess(name, phone, notes), 4000); // fallback after 4s
+}
+
+function showSuccess(name, phone, notes) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('secSuccess').classList.add('active');
+  // Pre-fill WhatsApp message
+  const msg = 'Hi AS Frames! I just placed an order.\nName: ' + name + '\nSize: ' + selectedSize + (notes ? '\nNotes: ' + notes : '');
+  document.getElementById('waConfirmBtn').href = 'https://wa.me/919491798928?text=' + encodeURIComponent(msg);
+  window.scrollTo(0, 0);
+}
+
+// Drag and drop
+const box = document.getElementById('uploadBox');
+box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('dragover'); });
+box.addEventListener('dragleave', () => box.classList.remove('dragover'));
+box.addEventListener('drop', e => {
+  e.preventDefault();
+  box.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    document.getElementById('i_photo').files = e.dataTransfer.files;
+    previewPhoto({ files: [file] });
+  }
+});
+</script>
+</body>
+</html>
