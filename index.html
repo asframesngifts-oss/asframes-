@@ -123,14 +123,14 @@ function checkPw(){
   const val=document.getElementById('pwInput').value;
   if(val==='Asframes@2024'){
     document.getElementById('lockScreen').style.display='none';
-    localStorage.setItem('asf_auth','1');
+    localStorage.setItem('asf_auth','Asframes@2024');
   } else {
     document.getElementById('pwError').style.display='block';
     document.getElementById('pwInput').value='';
     document.getElementById('pwInput').focus();
   }
 }
-if(localStorage.getItem('asf_auth')==='1'){
+if(localStorage.getItem('asf_auth')==='Asframes@2024'){
   document.getElementById('lockScreen').style.display='none';
 }
 </script>
@@ -374,28 +374,23 @@ function deleteOrder(idx){
 }
 
 function saveRecentCustomer(name, phone) {
-  let recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
-  // Remove if already exists
-  recents = recents.filter(r => r.phone !== phone);
-  // Add to front
-  recents.unshift({ name, phone });
-  // Keep only last 20
+  let recents = JSON.parse(localStorage.getItem("asf_recents") || "[]");
+  recents = recents.filter(function(r){ return r.phone !== phone; });
+  recents.unshift({ name: name, phone: phone });
   recents = recents.slice(0, 20);
-  localStorage.setItem('asf_recents', JSON.stringify(recents));
+  localStorage.setItem("asf_recents", JSON.stringify(recents));
   loadRecentCustomers();
 }
 
 function loadRecentCustomers() {
-  const recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
-  const nameInput = document.getElementById('f_name');
-  const phoneInput = document.getElementById('f_phone');
-  const listEl = document.getElementById('recentList');
+  const recents = JSON.parse(localStorage.getItem("asf_recents") || "[]");
+  const listEl = document.getElementById("recentList");
   if(!listEl) return;
-  if(!recents.length){ listEl.style.display='none'; return; }
-  listEl.style.display='block';
-  listEl.innerHTML = recents.map(r =>
-    '<div onclick="fillCustomer(''+r.name+'',''+r.phone+'')" style="padding:6px 10px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><span>'+r.name+'</span><span style="color:var(--text2);font-size:12px">'+r.phone+'</span></div>'
-  ).join('');
+  if(!recents.length){ listEl.style.display="none"; return; }
+  listEl.style.display="block";
+  listEl.innerHTML = recents.map(function(r){
+    return "<div onclick=\"fillCustomer('"+r.name+"','"+r.phone+"')\" style=\"padding:6px 10px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;\" onmouseover=\"this.style.background='var(--surface2)'\" onmouseout=\"this.style.background=''\"><span>"+r.name+"</span><span style=\"color:var(--text2);font-size:12px\">"+r.phone+"</span></div>";
+  }).join("");
 }
 
 function fillCustomer(name, phone) {
@@ -409,15 +404,15 @@ function saveRemind() { localStorage.setItem('asf_remind', JSON.stringify(remind
 
 // ─── CALCULATIONS ─────────────────────────────────────────
 function filterRecents(q){
-  const recents = JSON.parse(localStorage.getItem('asf_recents') || '[]');
-  const listEl = document.getElementById('recentList');
+  const recents = JSON.parse(localStorage.getItem("asf_recents") || "[]");
+  const listEl = document.getElementById("recentList");
   if(!q){ loadRecentCustomers(); return; }
   const filtered = recents.filter(r => r.name.toLowerCase().includes(q.toLowerCase()) || r.phone.includes(q));
-  if(!filtered.length){ listEl.style.display='none'; return; }
-  listEl.style.display='block';
+  if(!filtered.length){ listEl.style.display="none"; return; }
+  listEl.style.display="block";
   listEl.innerHTML = filtered.map(r =>
-    '<div onclick="fillCustomer(''+r.name+'',''+r.phone+'')" style="padding:6px 10px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><span>'+r.name+'</span><span style="color:var(--text2);font-size:12px">'+r.phone+'</span></div>'
-  ).join('');
+    "<div onclick=\"fillCustomer('"+r.name+"','"+r.phone+"')\" style=\"padding:6px 10px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);\" onmouseover=\"this.style.background='var(--surface2)'\" onmouseout=\"this.style.background=''\"><span>"+r.name+"</span><span style=\"color:var(--text2);font-size:12px\">"+r.phone+"</span></div>"
+  ).join("");
 }
 
 function toggleCustomSize(p){
@@ -688,25 +683,7 @@ updateStats();
 </script>
 </div>
 
-<script>
-function checkPw(){
-  const val = document.getElementById('pwInput').value;
-  if(val === 'Asframes@2024'){
-    document.getElementById('lockScreen').style.display = 'none';
-    document.getElementById('appContent').style.display = 'block';
-    localStorage.setItem('asf_auth', 'Asframes@2024');
-  } else {
-    document.getElementById('pwError').style.display = 'block';
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwInput').focus();
-  }
-}
-// Check session — stays logged in while tab is open, resets when tab closes
-if(localStorage.getItem('asf_auth') === 'Asframes@2024'){
-  document.getElementById('lockScreen').style.display = 'none';
-  document.getElementById('appContent').style.display = 'block';
-}
-</script>
+
 
 <!-- Customer Khata Modal -->
 <div class="overlay" id="khataModal">
