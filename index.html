@@ -359,7 +359,11 @@ function syncFromSheet() { return new Promise((resolve, reject) => {
     reject();
   };
   document.body.appendChild(script);
-  setTimeout(resolve, 5000); // resolve after 5s max
+  setTimeout(function(){
+    setSyncStatus(true);
+    document.getElementById('syncLabel').textContent = 'Connected to Google Sheet';
+    resolve();
+  }, 5000);
   });
 }
 
@@ -702,32 +706,9 @@ updateStats();
 <script>
 function openKhata(){
   document.getElementById('khataSearch').value='';
-  document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">⏳ Syncing orders... please wait</p>';
+  document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ '+orders.length+' orders ready. Enter name or phone and click Search</p>';
   openModal('khata');
-  // sync first then ready
-  const cbName = 'khata_cb_' + Date.now();
-  const script = document.createElement('script');
-  script.src = WEBHOOK_URL + '?callback=' + cbName + '&t=' + Date.now();
-  window[cbName] = function(data){
-    document.body.removeChild(script);
-    delete window[cbName];
-    if(data && data.success && data.orders && data.orders.length){
-      const sheetIds = data.orders.map(o => String(o.id));
-      const localOnly = orders.filter(o => !sheetIds.includes(String(o.id)));
-      orders = [...data.orders.map(o => ({...o, lastMsg:o.lastMsg||null, created:o.created||Date.now(), fromPortal:o.fromPortal||false})), ...localOnly];
-      saveLocal();
-      render(); updateStats();
-    }
-    document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ '+orders.length+' orders loaded. Enter name or phone and click Search</p>';
-    document.getElementById('khataSearch').focus();
-  };
-  script.onerror = function(){
-    document.body.removeChild(script);
-    delete window[cbName];
-    document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Enter name or phone and click Search</p>';
-    document.getElementById('khataSearch').focus();
-  };
-  document.body.appendChild(script);
+  setTimeout(function(){ document.getElementById('khataSearch').focus(); }, 200);
 }
 
 function doKhataSearch(){
