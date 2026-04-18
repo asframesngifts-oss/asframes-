@@ -223,8 +223,8 @@ tbody td{padding:8px 10px;vertical-align:middle}
 <div class="modal" style="max-width:620px">
   <h2>Customer Khata</h2>
   <div style="display:flex;gap:8px;margin-bottom:1rem">
-    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px" onkeydown="if(event.key==='Enter')doKhataSearch()">
-    <button class="btn primary" onclick="doKhataSearch()">Search</button>
+    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px" onkeydown="if(event.key==='Enter')syncThenSearch()">
+    <button class="btn primary" onclick="syncThenSearch()">Search</button>
     <button class="btn" onclick="closeModal('khata')">Close</button>
   </div>
   <div id="khataResults"><p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Enter name or phone and click Search</p></div>
@@ -311,7 +311,7 @@ function syncFromSheet() {
       updateStats();
     }
     setSyncStatus(true);
-    document.getElementById('syncLabel').textContent = 'Connected to Google Sheet';
+    document.getElementById('syncLabel').textContent = 'Connected to Google Sheet (' + orders.length + ' orders)';
   };
   script.onerror = function() {
     try { document.body.removeChild(script); } catch(e) {}
@@ -652,6 +652,38 @@ function openKhata() {
   document.getElementById('khataResults').innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ ' + total + ' orders ready. Enter name or phone and click Search</p>';
   openModal('khata');
   setTimeout(function() { document.getElementById('khataSearch').focus(); }, 200);
+}
+
+function syncThenSearch() {
+  // Sync from sheet first to get latest data, then search
+  var q = document.getElementById('khataSearch').value.trim();
+  if (!q) { doKhataSearch(); return; }
+  document.getElementById('khataResults').innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Syncing latest data...</p>';
+  var cbName = 'ks_' + Date.now();
+  var script = document.createElement('script');
+  script.src = WEBHOOK_URL + '?callback=' + cbName + '&t=' + Date.now();
+  window[cbName] = function(data) {
+    try { document.body.removeChild(script); } catch(e) {}
+    delete window[cbName];
+    if (data && data.success && data.orders && data.orders.length) {
+      var sheetIds = data.orders.map(function(o) { return String(o.id); });
+      var localOnly = orders.filter(function(o) { return sheetIds.indexOf(String(o.id)) === -1; });
+      orders = data.orders.map(function(o) {
+        return { id:o.id, name:o.name||'', phone:o.phone||'', size:o.size||'', frameType:o.frameType||'', qty:o.qty||1, notes:o.notes||'', amount:parseFloat(o.amount)||0, advance:parseFloat(o.advance)||0, balance:parseFloat(o.balance)||0, status:o.status||'New', lastMsg:o.lastMsg||null, created:o.created||Date.now(), fromPortal:o.fromPortal||false };
+      }).concat(localOnly);
+      saveLocal();
+      render();
+      updateStats();
+    }
+    doKhataSearch();
+  };
+  script.onerror = function() {
+    try { document.body.removeChild(script); } catch(e) {}
+    delete window[cbName];
+    doKhataSearch();
+  };
+  document.body.appendChild(script);
+  setTimeout(function() { doKhataSearch(); }, 5000);
 }
 
 function doKhataSearch() {
