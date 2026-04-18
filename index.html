@@ -547,6 +547,13 @@ function render() {
   var sf = document.getElementById('filterStatus').value;
   var tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
+  // Always merge localStorage with current orders
+  var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
+  var allIds = {};
+  var merged = [];
+  orders.forEach(function(o){ allIds[String(o.id)]=true; merged.push(o); });
+  saved.forEach(function(o){ if(!allIds[String(o.id)]){ merged.push(o); } });
+  if(merged.length > orders.length){ orders = merged; }
   var filtered = orders.filter(function(o) {
     return (!q || (o.name||'').toLowerCase().indexOf(q) !== -1 || (o.phone||'').indexOf(q) !== -1) &&
            (!sf || o.status === sf);
@@ -640,7 +647,7 @@ setInterval(function() {
 // KHATA
 function openKhata() {
   var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
-  var total = Math.max(orders.length, saved.length);
+  var total = saved.length > orders.length ? saved.length : orders.length;
   document.getElementById('khataSearch').value = '';
   document.getElementById('khataResults').innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ ' + total + ' orders ready. Enter name or phone and click Search</p>';
   openModal('khata');
@@ -651,14 +658,12 @@ function doKhataSearch() {
   var q = document.getElementById('khataSearch').value.trim().toLowerCase();
   var resultsDiv = document.getElementById('khataResults');
   if (!q) { resultsDiv.innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Please type a name or phone number</p>'; return; }
-  // Always use freshest data from localStorage + current session
+  // Always use freshest data
   var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
-  var allOrders = saved.slice();
-  orders.forEach(function(o) {
-    var exists = false;
-    for(var j=0;j<allOrders.length;j++){ if(String(allOrders[j].id)===String(o.id)){exists=true;break;} }
-    if(!exists) allOrders.push(o);
-  });
+  var allMap = {};
+  var allOrders = [];
+  saved.forEach(function(o){ allMap[String(o.id)]=true; allOrders.push(o); });
+  orders.forEach(function(o){ if(!allMap[String(o.id)]){ allOrders.push(o); } });
   var matched = allOrders.filter(function(o) {
     return (o.name || '').toLowerCase().indexOf(q) !== -1 || (o.phone || '').indexOf(q) !== -1;
   });
