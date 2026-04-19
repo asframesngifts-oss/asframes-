@@ -333,7 +333,9 @@ function allOrders()  {
   var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
   var map = {};
   var merged = [];
+  // In-memory orders (from sync) take priority
   orders.forEach(function(o){ map[String(o.id)]=true; merged.push(o); });
+  // Add any localStorage-only orders not yet in memory
   saved.forEach(function(o){ if(!map[String(o.id)]) merged.push(o); });
   return merged;
 }
@@ -361,9 +363,9 @@ function showNameDropdown() {
   if (!filtered.length) { list.style.display='none'; return; }
   var html = '';
   for(var i=0;i<filtered.length;i++){
-    var nm = filtered[i].name.replace(/"/g,'');
+    var nm = filtered[i].name.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     var ph = filtered[i].phone;
-    html += '<div class="recent-item" onclick="pickCustomer(this)"'
+    html += '<div class="recent-item" onmousedown="pickCustomer(this)"'
           + ' data-name="'+nm+'" data-phone="'+ph+'">'
           + '<span>'+filtered[i].name+'</span>'
           + '<span style="color:var(--text2);font-size:12px">'+ph+'</span>'
@@ -397,7 +399,20 @@ function toggleCustom(p) {
 }
 
 /* ── MODALS ──────────────────────────────────────────────── */
-function openModal(id)  { document.getElementById(id+'Modal').classList.add('open'); }
+function openModal(id)  {
+  document.getElementById(id+'Modal').classList.add('open');
+  if (id === 'add') {
+    // Reset form fields so dropdown shows all customers fresh each time
+    ['f_name','f_phone','f_notes','f_amount','f_advance','f_balance','f_customsize'].forEach(function(fid){ document.getElementById(fid).value=''; });
+    document.getElementById('f_qty').value='1';
+    document.getElementById('f_frametype').value='1 inch';
+    document.getElementById('f_size').value='4×6';
+    document.getElementById('f_custombox').style.display='none';
+    document.getElementById('recentList').style.display='none';
+    document.getElementById('recentList').innerHTML='';
+    setTimeout(function(){ document.getElementById('f_name').focus(); }, 150);
+  }
+}
 function closeModal(id) { document.getElementById(id+'Modal').classList.remove('open'); }
 
 /* ── ADD ORDER ───────────────────────────────────────────── */
@@ -513,7 +528,8 @@ function render() {
   var tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
   var all = allOrders();
-  if (all.length > orders.length) { orders = all; }
+  // Keep orders in sync with merged result
+  orders = all;
 
   var filtered = all.filter(function(o){
     return (!q || (o.name||'').toLowerCase().indexOf(q)!==-1 || (o.phone||'').indexOf(q)!==-1) &&
@@ -550,12 +566,14 @@ function render() {
   }
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:2.5rem;color:var(--text2);font-size:13px">'+(q?'No results for "'+q+'"':'No orders. Click "+ New Order" to add one.')+'</td></tr>';
+    var emptyRow = document.createElement('tr');
+    emptyRow.innerHTML = '<td colspan="13" style="text-align:center;padding:2.5rem;color:var(--text2);font-size:13px">'+(q?'No results for "'+q+'"':'No orders. Click "+ New Order" to add one.')+'</td>';
+    tbody.appendChild(emptyRow);
     return;
   }
 
   filtered.forEach(function(o){
-    var idx = orders.indexOf(o);
+    var idx = orders.findIndex(function(x){ return String(x.id)===String(o.id); });
     if (idx===-1) { orders.push(o); idx=orders.length-1; }
     var minsAgo = o.lastMsg ? Math.floor((Date.now()-o.lastMsg)/60000) : 9999;
     var urgent  = minsAgo>=120 && o.status!=='Delivered';
@@ -640,6 +658,38 @@ function openKhata() {
   document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">'+all.length+' orders ready. Enter name or phone and click Search</p>';
   openModal('khata');
   setTimeout(function(){document.getElementById('khataSearch').focus();},200);
+}
+function syncThenSearch() {
+  // Sync latest data then run the khata search
+  var q = document.getElementById('khataSearch').value.trim();
+  if (!q) { doKhataSearch(); return; }
+  setSyncStatus(false);
+  var cb = 'cb_' + Date.now();
+  var sc = document.createElement('script');
+  sc.src = WEBHOOK_URL + '?callback=' + cb + '&t=' + Date.now();
+  window[cb] = function(data) {
+    try { document.body.removeChild(sc); } catch(e){}
+    delete window[cb];
+    if (data && data.success && data.orders && data.orders.length) {
+      var ids = {};
+      data.orders.forEach(function(o){ ids[String(o.id)] = true; });
+      var local = orders.filter(function(o){ return !ids[String(o.id)]; });
+      orders = data.orders.map(function(o){
+        return {id:o.id,name:o.name||'',phone:o.phone||'',size:o.size||'',frameType:o.frameType||'',qty:o.qty||1,notes:o.notes||'',amount:parseFloat(o.amount)||0,advance:parseFloat(o.advance)||0,balance:parseFloat(o.balance)||0,status:o.status||'New',lastMsg:o.lastMsg||null,created:o.created||Date.now(),fromPortal:o.fromPortal||false};
+      }).concat(local);
+      saveLocal();
+    }
+    setSyncStatus(true);
+    doKhataSearch();
+  };
+  sc.onerror = function() {
+    try { document.body.removeChild(sc); } catch(e){}
+    delete window[cb];
+    setSyncStatus(true);
+    doKhataSearch();
+  };
+  document.body.appendChild(sc);
+  setTimeout(function(){ if(window[cb]){ try{document.body.removeChild(sc);}catch(e){} delete window[cb]; setSyncStatus(true); doKhataSearch(); } }, 6000);
 }
 function doKhataSearch() {
   var q=document.getElementById('khataSearch').value.trim().toLowerCase();
