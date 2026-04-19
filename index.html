@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AS Frames – Order Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -109,6 +110,7 @@ tbody td{padding:8px 10px;vertical-align:middle}
       <button class="btn" onclick="syncFromSheet()">↻ Sync</button>
       <button class="btn" style="border-color:#534AB7;color:#534AB7" onclick="openKhata()">Customer Khata</button>
       <button class="btn primary" onclick="openModal('add')">+ New Order</button>
+<span id="newBadge" style="display:none;background:#993C1D;color:#fff;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;margin-left:-4px">NEW</span>
     </div>
   </div>
 
@@ -223,8 +225,8 @@ tbody td{padding:8px 10px;vertical-align:middle}
 <div class="modal" style="max-width:620px">
   <h2>Customer Khata</h2>
   <div style="display:flex;gap:8px;margin-bottom:1rem">
-    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px" onkeydown="if(event.key==='Enter')syncThenSearch()">
-    <button class="btn primary" onclick="syncThenSearch()">Search</button>
+    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px" onkeydown="if(event.key==='Enter')doKhataSearch()">
+    <button class="btn primary" onclick="doKhataSearch()">Search</button>
     <button class="btn" onclick="closeModal('khata')">Close</button>
   </div>
   <div id="khataResults"><p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Enter name or phone and click Search</p></div>
@@ -232,7 +234,7 @@ tbody td{padding:8px 10px;vertical-align:middle}
 </div>
 
 <script>
-var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyBFptVsaCMS2I4zXCJjagr2k4Tfo06smELOUN7R5GdWPN3tGmpsV6ILvoUBJrQSOA9yQ/exec';
+var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxfF006DpIXaCkMOSzLaSZ7q51aUR1Kw1xijmrZyYQaNbyhvYbf27vjj8w6xvdRVocCjg/exec';
 var PASSWORD    = 'Asframes@2024';
 
 var WA_MSGS = {
@@ -633,12 +635,16 @@ function playAlert() {
 function showAlert(msg) {
   document.getElementById('alertMsg').textContent=msg;
   document.getElementById('alertBar').classList.add('show');
+  document.getElementById('newBadge').style.display = 'inline';
   playAlert();
   if(Notification.permission==='granted') new Notification('AS Frames',{body:msg});
   else if(Notification.permission!=='denied') Notification.requestPermission();
-  setTimeout(closeAlert,8000);
+  setTimeout(closeAlert,9000);
 }
-function closeAlert(){document.getElementById('alertBar').classList.remove('show');}
+  function closeAlert(){
+  document.getElementById('alertBar').classList.remove('show');
+  document.getElementById('newBadge').style.display='none';
+}
 
 /* ── AUTO REMIND ─────────────────────────────────────────── */
 setInterval(function(){
@@ -654,21 +660,14 @@ setInterval(function(){
 /* ── KHATA (kept as bonus) ───────────────────────────────── */
 function openKhata() {
   document.getElementById('khataSearch').value='';
-  var all=allOrders();
-  document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">'+all.length+' orders ready. Enter name or phone and click Search</p>';
+  document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">⏳ Syncing orders... please wait</p>';
   openModal('khata');
-  setTimeout(function(){document.getElementById('khataSearch').focus();},200);
-}
-function syncThenSearch() {
-  // Sync latest data then run the khata search
-  var q = document.getElementById('khataSearch').value.trim();
-  if (!q) { doKhataSearch(); return; }
-  setSyncStatus(false);
-  var cb = 'cb_' + Date.now();
+  // Sync fresh from sheet FIRST, then allow searching
+  var cb = 'khata_cb_' + Date.now();
   var sc = document.createElement('script');
   sc.src = WEBHOOK_URL + '?callback=' + cb + '&t=' + Date.now();
   window[cb] = function(data) {
-    try { document.body.removeChild(sc); } catch(e){}
+    try { document.body.removeChild(sc); } catch(e) {}
     delete window[cb];
     if (data && data.success && data.orders && data.orders.length) {
       var ids = {};
@@ -678,25 +677,24 @@ function syncThenSearch() {
         return {id:o.id,name:o.name||'',phone:o.phone||'',size:o.size||'',frameType:o.frameType||'',qty:o.qty||1,notes:o.notes||'',amount:parseFloat(o.amount)||0,advance:parseFloat(o.advance)||0,balance:parseFloat(o.balance)||0,status:o.status||'New',lastMsg:o.lastMsg||null,created:o.created||Date.now(),fromPortal:o.fromPortal||false};
       }).concat(local);
       saveLocal();
+      render(); updateStats();
     }
-    setSyncStatus(true);
-    doKhataSearch();
+    document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ '+orders.length+' orders loaded. Enter name or phone and click Search</p>';
+    document.getElementById('khataSearch').focus();
   };
   sc.onerror = function() {
-    try { document.body.removeChild(sc); } catch(e){}
+    try { document.body.removeChild(sc); } catch(e) {}
     delete window[cb];
-    setSyncStatus(true);
-    doKhataSearch();
+    document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Enter name or phone and click Search</p>';
+    document.getElementById('khataSearch').focus();
   };
   document.body.appendChild(sc);
-  setTimeout(function(){ if(window[cb]){ try{document.body.removeChild(sc);}catch(e){} delete window[cb]; setSyncStatus(true); doKhataSearch(); } }, 6000);
 }
 function doKhataSearch() {
   var q=document.getElementById('khataSearch').value.trim().toLowerCase();
   var resultsDiv=document.getElementById('khataResults');
   if(!q){resultsDiv.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Please type a name or phone number</p>';return;}
-  var all=allOrders();
-  var matched=all.filter(function(o){return (o.name||'').toLowerCase().indexOf(q)!==-1||(o.phone||'').indexOf(q)!==-1;});
+  var matched=orders.filter(function(o){return (o.name||'').toLowerCase().indexOf(q)!==-1||(o.phone||'').toString().indexOf(q)!==-1;});
   if(!matched.length){resultsDiv.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">No customer found for "'+q+'"</p>';return;}
   var customers={};
   matched.forEach(function(o){var key=o.phone||o.name;if(!customers[key])customers[key]={name:o.name,phone:o.phone,orders:[]};customers[key].orders.push(o);});
