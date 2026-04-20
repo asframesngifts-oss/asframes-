@@ -4,34 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AS Frames – Order Dashboard</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f7f5f0;--surface:#fff;--surface2:#f0ede6;
-  --text:#1a1a18;--text2:#6b6a65;
-  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
-  --accent:#D85A30;--accent2:#B84820;
-  --green:#2d7a4f;--red:#993C1D;--wa:#128C7E;
-  --radius:10px;--radius-lg:14px;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --text: #1a1a18;
+  --text2: #6b6a65;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --accent: #D85A30;
+  --accent2: #B84820;
+  --green: #2d7a4f;
+  --red: #993C1D;
+  --wa: #128C7E;
+  --radius: 10px;
+  --radius-lg: 14px;
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#111110;--surface:#1c1c1a;--surface2:#242422;
-  --text:#eeebe3;--text2:#888780;
-  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+  --text:#eeebe3;--text2:#888780;--border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
 }}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;padding:1rem;color:var(--text)}
-.app{max-width:1200px;margin:0 auto}
+.app{max-width:1140px;margin:0 auto}
+
+/* topbar */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.25rem;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1rem;gap:12px;flex-wrap:wrap}
 .logo{font-size:19px;font-weight:600;letter-spacing:-.5px}.logo em{color:var(--accent);font-style:normal}
 .sync-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
 .dot{width:7px;height:7px;border-radius:50%;background:#ccc}
 .dot.live{background:#3B6D11;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.badge-new{background:var(--accent);color:#fff;border-radius:999px;font-size:11px;padding:2px 9px;margin-left:6px}
+
+/* stats */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
 .stat{background:var(--surface2);border-radius:var(--radius);padding:.9rem 1rem}
 .stat-label{font-size:11px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
 .stat-val{font-size:23px;font-weight:600;color:var(--text)}
+
+/* toolbar */
 .toolbar{display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;align-items:center}
 .toolbar input[type=text],.toolbar select{padding:7px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:13px}
 .toolbar input[type=text]{flex:1;min-width:160px}
@@ -43,8 +56,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn.wa:hover{background:#0a6b60}
 .btn.sm{padding:4px 9px;font-size:12px}
 .btn.remind{border-color:var(--accent);color:var(--accent)}
+.btn.remind:hover{background:#faece7}
+
+/* table */
 .table-wrap{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
 thead th{background:var(--surface2);padding:9px 10px;text-align:left;font-weight:500;font-size:11px;color:var(--text2);border-bottom:0.5px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.4px}
 tbody tr{border-bottom:0.5px solid var(--border)}
 tbody tr:last-child{border-bottom:none}
@@ -62,55 +78,92 @@ tbody td{padding:8px 10px;vertical-align:middle}
 .timer.urgent{color:#993C1D;background:#FAECE7;font-weight:500}
 .actions{display:flex;gap:4px;flex-wrap:wrap}
 .portal-tag{font-size:10px;background:#E6F1FB;color:#185FA5;border-radius:4px;padding:1px 5px;margin-left:4px}
+
+/* modal */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:1rem}
 .overlay.open{display:flex}
 .modal{background:var(--surface);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:1.5rem;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
 .modal h2{font-size:16px;font-weight:600;margin-bottom:1rem}
-.frow{margin-bottom:.7rem;position:relative}
+.frow{margin-bottom:.7rem}
 .frow label{display:block;font-size:12px;color:var(--text2);margin-bottom:3px}
 .frow input,.frow select,.frow textarea{width:100%;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit}
 .frow textarea{resize:vertical;min-height:55px}
+.frow input[type=file]{padding:4px}
 .frow input[readonly]{background:var(--surface2)}
 .fin-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:.7rem}
 .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
+
+/* alert */
 .alert-bar{display:none;position:fixed;top:16px;right:16px;z-index:200;background:var(--accent);color:#fff;padding:12px 18px;border-radius:var(--radius-lg);font-size:13px;font-weight:500;box-shadow:0 4px 24px rgba(0,0,0,.25);max-width:320px;animation:slidein .3s ease}
 @keyframes slidein{from{transform:translateX(120%)}to{transform:translateX(0)}}
 .alert-bar.show{display:flex;align-items:center;gap:10px}
-.recent-list{display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius);z-index:50;max-height:150px;overflow-y:auto}
-.recent-item{padding:7px 10px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;border-bottom:0.5px solid var(--border)}
-.recent-item:hover{background:var(--surface2)}
-@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.fin-row{grid-template-columns:1fr}}
+
+/* webhook setup banner */
+.setup-banner{background:#FAEEDA;border:0.5px solid #FAC775;border-radius:var(--radius);padding:.85rem 1rem;margin-bottom:1rem;font-size:13px;color:#633806;display:flex;align-items:flex-start;gap:10px}
+.setup-banner b{font-weight:600}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .fin-row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-
-<!-- PASSWORD SCREEN -->
-<div id="lockScreen" style="position:fixed;inset:0;background:#f7f5f0;z-index:9999;display:flex;align-items:center;justify-content:center">
-  <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:90%;max-width:340px;text-align:center">
-    <div style="font-size:24px;font-weight:700;margin-bottom:.25rem">AS <span style="color:#D85A30">Frames</span></div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">Enter password to continue</div>
-    <input id="pwInput" type="password" placeholder="Password" style="width:100%;padding:12px 14px;border:0.5px solid var(--border2);border-radius:10px;font-size:15px;text-align:center;margin-bottom:.75rem;background:var(--surface);color:var(--text)" onkeydown="if(event.key==='Enter')checkPw()">
-    <button onclick="checkPw()" style="width:100%;padding:12px;background:#D85A30;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer">Unlock Dashboard</button>
+<div id="lockScreen" style="position:fixed;inset:0;background:#f7f5f0;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column">
+  <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:16px;padding:2.5rem 2rem;width:90%;max-width:340px;text-align:center">
+    <div style="font-size:22px;font-weight:600;margin-bottom:.25rem">AS <span style="color:#D85A30">Frames</span></div>
+    <div style="font-size:13px;color:#6b6a65;margin-bottom:1.5rem">Enter password to continue</div>
+    <input id="pwInput" type="password" placeholder="Password" style="width:100%;padding:10px 14px;border:0.5px solid rgba(0,0,0,0.18);border-radius:10px;font-size:15px;text-align:center;margin-bottom:.75rem;background:#fff;color:#1a1a18" onkeydown="if(event.key==='Enter')checkPw()">
+    <button onclick="checkPw()" style="width:100%;padding:10px;background:#D85A30;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer">Unlock</button>
     <div id="pwError" style="color:#993C1D;font-size:12px;margin-top:.6rem;display:none">Incorrect password. Try again.</div>
   </div>
 </div>
-
-<!-- ALERT BAR -->
+<script>
+function checkPw(){
+  const val=document.getElementById('pwInput').value;
+  if(val==='Asframes@2024'){
+    document.getElementById('lockScreen').style.display='none';
+    localStorage.setItem('asf_auth','1');
+  } else {
+    document.getElementById('pwError').style.display='block';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+}
+if(localStorage.getItem('asf_auth')==='1'){
+  document.getElementById('lockScreen').style.display='none';
+}
+</script>
 <div class="alert-bar" id="alertBar">
   <svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#fff" fill-opacity=".25"/><path d="M8 4v4M8 11v1" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
   <span id="alertMsg">New order received!</span>
-  <button onclick="closeAlert()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:18px;margin-left:8px">×</button>
+  <button onclick="closeAlert()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:18px;margin-left:8px;line-height:1">×</button>
 </div>
 
 <div class="app">
+
+  <!-- Setup banner — hidden once webhook is configured -->
+  <div class="setup-banner" id="setupBanner">
+    <svg width="16" height="16" viewBox="0 0 16 16" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="8" fill="#EF9F27"/><path d="M8 4v4M8 11v1" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <div><b>Setup required:</b> Paste your Google Apps Script Web App URL below to connect Google Sheets.<br>
+    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+      <input type="text" id="webhookInput" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" style="flex:1;min-width:200px;padding:5px 9px;border:0.5px solid #FAC775;border-radius:6px;background:#fff;color:#1a1a18;font-size:12px">
+      <button class="btn primary" style="padding:5px 12px;font-size:12px" onclick="saveWebhook()">Connect</button>
+      <button class="btn" style="padding:5px 12px;font-size:12px" onclick="dismissBanner()">Dismiss</button>
+    </div></div>
+  </div>
+
   <div class="topbar">
-    <div class="logo">AS <em>Frames</em></div>
-    <div class="sync-status"><span class="dot live" id="syncDot"></span><span id="syncLabel">Connected</span></div>
+    <div class="logo">AS <em>Frames</em> <span id="newBadge" class="badge-new" style="display:none">New!</span></div>
+    <div class="sync-status">
+      <span class="dot" id="syncDot"></span>
+      <span id="syncLabel">Not connected</span>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn" onclick="syncFromSheet()">↻ Sync</button>
-      <button class="btn" style="border-color:#534AB7;color:#534AB7" onclick="openKhata()">Customer Khata</button>
+      <button class="btn" onclick="syncFromSheet()" title="Pull latest orders from Google Sheet">↻ Sync</button>
+      
+    <button class="btn" style="border-color:#534AB7;color:#534AB7" onclick="openKhata()">Customer Khata</button>
       <button class="btn primary" onclick="openModal('add')">+ New Order</button>
-<span id="newBadge" style="display:none;background:#993C1D;color:#fff;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;margin-left:-4px">NEW</span>
     </div>
   </div>
 
@@ -133,40 +186,25 @@ tbody td{padding:8px 10px;vertical-align:middle}
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>#</th><th>Customer</th><th>Phone</th><th>Size</th><th>Frame</th><th>Qty</th><th>Status</th>
-        <th>Amount</th><th>Advance</th><th>Balance</th><th>Payment</th><th>Last msg</th><th>Actions</th>
+        <th>#</th><th>Customer</th><th>Phone</th><th>Size</th><th>Status</th>
+        <th>Amount</th><th>Advance</th><th>Balance</th><th>Last msg</th><th>Actions</th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
 </div>
 
-<!-- ADD MODAL -->
+<!-- Add Modal -->
 <div class="overlay" id="addModal">
 <div class="modal">
   <h2>New order</h2>
-  <div class="frow">
-    <label>Customer name</label>
-    <input id="f_name" type="text" placeholder="Ravi Kumar" onfocus="showNameDropdown()" oninput="showNameDropdown()" autocomplete="off">
-    <div class="recent-list" id="recentList"></div>
-  </div>
-  <div class="frow"><label>WhatsApp number</label><input id="f_phone" type="text" placeholder="919876543210"></div>
+  <div class="frow"><label>Customer name</label><input id="f_name" type="text" placeholder="Ravi Kumar"></div>
+  <div class="frow"><label>WhatsApp number (with country code)</label><input id="f_phone" type="text" placeholder="919876543210"></div>
   <div class="frow"><label>Frame size</label>
-    <select id="f_size" onchange="toggleCustom('f')">
-      <option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option>
-    </select>
+    <select id="f_size"><option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option></select>
   </div>
-  <div class="frow" id="f_custombox" style="display:none"><label>Custom size</label><input id="f_customsize" type="text" placeholder="e.g. 14×18 inches"></div>
-  <div class="frow"><label>Frame type</label>
-    <select id="f_frametype">
-      <option value="1 inch">1 inch</option><option value="1.5 inch">1.5 inch</option>
-      <option value="2 inch">2 inch</option><option value="3 inch">3 inch</option><option value="Custom">Custom</option>
-    </select>
-  </div>
-  <div class="frow"><label>Quantity</label>
-    <select id="f_qty"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
-  </div>
-  <div class="frow"><label>Notes</label><textarea id="f_notes" placeholder="Design instructions, background colour, text…"></textarea></div>
+  <div class="frow"><label>Notes / design instructions</label><textarea id="f_notes" placeholder="Background colour, text, special requests…"></textarea></div>
+  <div class="frow"><label>Reference photo (optional)</label><input id="f_photo" type="file" accept="image/*"></div>
   <div class="fin-row">
     <div class="frow" style="margin:0"><label>Total (₹)</label><input id="f_amount" type="number" placeholder="500" oninput="calcBal('f')"></div>
     <div class="frow" style="margin:0"><label>Advance (₹)</label><input id="f_advance" type="number" placeholder="200" oninput="calcBal('f')"></div>
@@ -174,12 +212,12 @@ tbody td{padding:8px 10px;vertical-align:middle}
   </div>
   <div class="modal-btns">
     <button class="btn" onclick="closeModal('add')">Cancel</button>
-    <button class="btn primary" onclick="addOrder()">Save Order</button>
+    <button class="btn primary" onclick="addOrder()">Save & sync</button>
   </div>
 </div>
 </div>
 
-<!-- EDIT MODAL -->
+<!-- Edit Modal -->
 <div class="overlay" id="editModal">
 <div class="modal">
   <h2>Edit order</h2>
@@ -187,27 +225,16 @@ tbody td{padding:8px 10px;vertical-align:middle}
   <div class="frow"><label>Customer name</label><input id="e_name" type="text"></div>
   <div class="frow"><label>WhatsApp number</label><input id="e_phone" type="text"></div>
   <div class="frow"><label>Frame size</label>
-    <select id="e_size" onchange="toggleCustom('e')">
-      <option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option>
-    </select>
+    <select id="e_size"><option>4×6</option><option>5×7</option><option>8×10</option><option>10×12</option><option>12×16</option><option>16×20</option><option>Custom</option></select>
   </div>
-  <div class="frow" id="e_custombox" style="display:none"><label>Custom size</label><input id="e_customsize" type="text" placeholder="e.g. 14×18 inches"></div>
-  <div class="frow"><label>Frame type</label>
-    <select id="e_frametype">
-      <option value="1 inch">1 inch</option><option value="1.5 inch">1.5 inch</option>
-      <option value="2 inch">2 inch</option><option value="3 inch">3 inch</option><option value="Custom">Custom</option>
-    </select>
-  </div>
-  <div class="frow"><label>Quantity</label>
-    <select id="e_qty"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
-  </div>
-  <div class="frow"><label>Status</label>
+  <div class="frow"><label>Status <small style="color:var(--text2)">(changing status auto-sends WhatsApp)</small></label>
     <select id="e_status">
       <option>New</option><option>Designing</option><option>Sent for Review</option>
       <option>Approved</option><option>Printing</option><option>Ready</option><option>Delivered</option>
     </select>
   </div>
   <div class="frow"><label>Notes</label><textarea id="e_notes"></textarea></div>
+
   <div class="fin-row">
     <div class="frow" style="margin:0"><label>Total (₹)</label><input id="e_amount" type="number" oninput="calcBal('e')"></div>
     <div class="frow" style="margin:0"><label>Advance (₹)</label><input id="e_advance" type="number" oninput="calcBal('e')"></div>
@@ -215,17 +242,369 @@ tbody td{padding:8px 10px;vertical-align:middle}
   </div>
   <div class="modal-btns">
     <button class="btn" onclick="closeModal('edit')">Cancel</button>
-    <button class="btn primary" onclick="saveEdit()">Save Changes</button>
+    <button class="btn primary" onclick="saveEdit()">Save & sync</button>
   </div>
 </div>
 </div>
 
-<!-- KHATA MODAL -->
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxfF006DpIXaCkMOSzLaSZ7q51aUR1Kw1xijmrZyYQaNbyhvYbf27vjj8w6xvdRVocCjg/exec';
+// ──────────────────────────────────────────────────────────
+
+const WA_MSGS = {
+  'Designing':       'Hi {name}! 🖼️ Your AS Frames order is being designed. We will send you a preview soon.',
+  'Sent for Review': 'Hi {name}! Your frame design is ready for review. Please check and share your feedback. 😊',
+  'Approved':        'Hi {name}! ✅ Your design is approved. We are now printing your frame.',
+  'Printing':        'Hi {name}! 🖨️ Your frame is being printed and will be ready very soon.',
+  'Ready':           'Hi {name}! 🎉 Your photo frame is READY! Please arrange to collect it. Balance due: ₹{balance}.',
+  'Delivered':       'Hi {name}! ❤️ Thank you for choosing AS Frames. Hope you love your frame! Please share a photo if you can.'
+};
+const REMIND = 'Hi {name}! 🙏 Gentle reminder from AS Frames — please let us know if you have any feedback on your order. Thank you!';
+
+let orders = JSON.parse(localStorage.getItem('asf_orders') || '[]');
+let remindAt = JSON.parse(localStorage.getItem('asf_remind') || '{}');
+
+// ─── WEBHOOK SETUP ────────────────────────────────────────
+function saveWebhook() {
+  const url = document.getElementById('webhookInput').value.trim();
+  if (!url.startsWith('https://script.google.com')) { alert('Please paste a valid Google Apps Script URL.'); return; }
+  WEBHOOK_URL = url;
+  localStorage.setItem('asf_webhook', url);
+  setSyncStatus(true);
+  dismissBanner();
+  syncFromSheet();
+}
+function dismissBanner() { document.getElementById('setupBanner').style.display = 'none'; }
+
+function setSyncStatus(live) {
+  document.getElementById('syncDot').className = 'dot' + (live ? ' live' : '');
+  document.getElementById('syncLabel').textContent = live ? 'Connected to Google Sheet' : 'Not connected';
+}
+
+// ─── SYNC: PUSH order to Google Sheet (JSONP — no CORS issues) ────
+function pushToSheet(order) {
+  if (!WEBHOOK_URL) return;
+  try {
+    const params = new URLSearchParams({
+      action: 'save',
+      data: JSON.stringify(order)
+    });
+    const img = new Image();
+    img.src = WEBHOOK_URL + '?' + params.toString();
+  } catch(e) { console.warn('Push failed:', e); }
+}
+
+// ─── SYNC: PULL orders FROM Google Sheet (JSONP) ──────────────────
+function syncFromSheet() { return new Promise((resolve, reject) => {
+  if (!WEBHOOK_URL) { alert('Please connect your Google Sheet first (see the yellow banner).'); return; }
+  setSyncStatus(false);
+  document.getElementById('syncLabel').textContent = 'Syncing…';
+  const cbName = 'asf_cb_' + Date.now();
+  const script = document.createElement('script');
+  script.src = WEBHOOK_URL + '?callback=' + cbName + '&t=' + Date.now();
+  window[cbName] = function(data) {
+    document.body.removeChild(script);
+    delete window[cbName];
+    if (data && data.success && data.orders) {
+      if (data.orders.length) {
+        const sheetIds = data.orders.map(o => String(o.id));
+        const localOnly = orders.filter(o => !sheetIds.includes(String(o.id)));
+        orders = [...data.orders.map(o => ({
+          ...o,
+          lastMsg: o.lastMsg || null,
+          created: o.created || Date.now(),
+          fromPortal: o.fromPortal || false
+        })), ...localOnly];
+        saveLocal();
+        render(); updateStats();
+        showAlert('Synced ' + data.orders.length + ' orders from Google Sheet!');
+      } else {
+        showAlert('Connected! No orders in sheet yet.');
+      }
+      setSyncStatus(true);
+      resolve();
+    } else {
+      setSyncStatus(false);
+      document.getElementById('syncLabel').textContent = 'Sync failed — check Apps Script';
+      reject();
+    }
+  };
+  script.onerror = function() {
+    document.body.removeChild(script);
+    delete window[cbName];
+    setSyncStatus(false);
+    document.getElementById('syncLabel').textContent = 'Sync failed — check Apps Script';
+    reject();
+  };
+  document.body.appendChild(script);
+  setTimeout(resolve, 5000); // resolve after 5s max
+  });
+}
+
+// ─── LOCAL STORAGE ────────────────────────────────────────
+function saveLocal() { localStorage.setItem('asf_orders', JSON.stringify(orders)); }
+function saveRemind() { localStorage.setItem('asf_remind', JSON.stringify(remindAt)); }
+
+// ─── CALCULATIONS ─────────────────────────────────────────
+function calcBal(p) {
+  const a = parseFloat(document.getElementById(p+'_amount').value) || 0;
+  const adv = parseFloat(document.getElementById(p+'_advance').value) || 0;
+  document.getElementById(p+'_balance').value = Math.max(0, a - adv);
+}
+
+// ─── MODALS ───────────────────────────────────────────────
+function openModal(id) { document.getElementById(id+'Modal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id+'Modal').classList.remove('open'); }
+
+// ─── ADD ORDER ────────────────────────────────────────────
+function addOrder() {
+  const name = document.getElementById('f_name').value.trim();
+  const phone = document.getElementById('f_phone').value.trim();
+  if (!name || !phone) { alert('Name and phone are required.'); return; }
+  const amount = parseFloat(document.getElementById('f_amount').value) || 0;
+  const advance = parseFloat(document.getElementById('f_advance').value) || 0;
+  const o = {
+    id: Date.now(), name, phone,
+    size: document.getElementById('f_size').value,
+    notes: document.getElementById('f_notes').value,
+    status: 'New', amount, advance,
+    balance: Math.max(0, amount - advance),
+    lastMsg: null, created: Date.now(), fromPortal: false
+  };
+  orders.push(o);
+  saveLocal();
+  pushToSheet(o);
+  closeModal('add');
+  ['f_name','f_phone','f_notes','f_amount','f_advance','f_balance'].forEach(i => document.getElementById(i).value = '');
+  render(); updateStats();
+}
+
+// ─── EDIT ORDER ───────────────────────────────────────────
+function openEdit(idx) {
+  const o = orders[idx];
+  document.getElementById('e_idx').value = idx;
+  document.getElementById('e_name').value = o.name;
+  document.getElementById('e_phone').value = o.phone;
+  document.getElementById('e_size').value = o.size;
+  document.getElementById('e_status').value = o.status;
+  document.getElementById('e_notes').value = o.notes || '';
+  document.getElementById('e_amount').value = o.amount || 0;
+  document.getElementById('e_advance').value = o.advance || 0;
+  document.getElementById('e_balance').value = o.balance || 0;
+  openModal('edit');
+}
+function saveEdit() {
+  const idx = parseInt(document.getElementById('e_idx').value);
+  const oldStatus = orders[idx].status;
+  const newStatus = document.getElementById('e_status').value;
+  orders[idx] = {
+    ...orders[idx],
+    name:    document.getElementById('e_name').value,
+    phone:   document.getElementById('e_phone').value,
+    size:    document.getElementById('e_size').value,
+    status:  newStatus,
+    notes:   document.getElementById('e_notes').value,
+    amount:  parseFloat(document.getElementById('e_amount').value) || 0,
+    advance: parseFloat(document.getElementById('e_advance').value) || 0,
+    balance: Math.max(0, (parseFloat(document.getElementById('e_amount').value)||0) - (parseFloat(document.getElementById('e_advance').value)||0))
+  };
+  saveLocal();
+  pushToSheet(orders[idx]);
+  closeModal('edit');
+  if (oldStatus !== newStatus && WA_MSGS[newStatus]) setTimeout(() => sendStatusWA(idx), 200);
+  render(); updateStats();
+}
+
+// ─── WHATSAPP ─────────────────────────────────────────────
+function sendStatusWA(idx) {
+  const o = orders[idx];
+  const msg = (WA_MSGS[o.status] || '').replace(/{name}/g, o.name).replace('{balance}', o.balance);
+  orders[idx].lastMsg = Date.now();
+  saveLocal();
+  window.open('https://wa.me/' + o.phone + '?text=' + encodeURIComponent(msg), '_blank');
+  render();
+}
+function openRemind(idx) {
+  const o = orders[idx];
+  const msg = REMIND.replace('{name}', o.name);
+  orders[idx].lastMsg = Date.now();
+  remindAt[idx] = Date.now();
+  saveLocal(); saveRemind();
+  window.open('https://wa.me/' + o.phone + '?text=' + encodeURIComponent(msg), '_blank');
+  render();
+}
+function deleteOrder(idx) {
+  if (!confirm('Delete order for ' + orders[idx].name + '?')) return;
+  orders.splice(idx, 1);
+  saveLocal();
+  render();
+  updateStats();
+}
+// ─── TIME ─────────────────────────────────────────────────
+function timeSince(ts) {
+  if (!ts) return 'Never';
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return s + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  return Math.floor(s/3600) + 'h ago';
+}
+
+// ─── RENDER TABLE ─────────────────────────────────────────
+function render() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const sf = document.getElementById('filterStatus').value;
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  const filtered = orders.filter(o =>
+    (!q || o.name.toLowerCase().includes(q) || o.phone.includes(q)) &&
+    (!sf || o.status === sf)
+  );
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2.5rem;color:var(--text2);font-size:13px">No orders. Click "+ New Order" or sync from Google Sheet.</td></tr>';
+    return;
+  }
+  filtered.forEach(o => {
+    const idx = orders.indexOf(o);
+    const minsAgo = o.lastMsg ? Math.floor((Date.now() - o.lastMsg) / 60000) : 9999;
+    const urgent = minsAgo >= 120 && o.status !== 'Delivered';
+    const sc = ('s-' + o.status).replace(/ /g, '-');
+    const overpaid = parseFloat(o.advance) - parseFloat(o.amount);
+    const payHtml = overpaid > 0
+      ? `<span style="background:#E6F1FB;color:#185FA5;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">₹${overpaid.toLocaleString('en-IN')} Credit</span>`
+      : o.balance === 0
+      ? `<span style="background:#EAF3DE;color:#2d7a4f;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">Paid</span>`
+      : `<span style="background:#FAECE7;color:#993C1D;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">₹${o.balance} left</span>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text2);font-size:12px">#${o.id}</td>
+      <td style="font-weight:500">${o.name}${o.fromPortal ? '<span class="portal-tag">portal</span>' : ''}
+        ${o.notes ? '<br><span style="font-size:11px;color:var(--text2)">' + o.notes.substring(0,38) + (o.notes.length>38?'…':'') + '</span>' : ''}</td>
+      <td style="color:var(--text2)">${o.phone}</td>
+      <td>${o.size}</td>
+      <td><span class="pill ${sc}">${o.status}</span></td>
+      <td>₹${o.amount}</td>
+      <td style="color:var(--green)">₹${o.advance}</td>
+      <td style="color:${o.balance>0?'var(--red)':'var(--green)'}">₹${o.balance}</td>
+      <td>${payHtml}</td>
+      <td><span class="timer ${urgent?'urgent':''}">${timeSince(o.lastMsg)}</span></td>
+      <td class="actions">
+        <button class="btn sm" onclick="openEdit(${idx})">Edit</button>
+        <button class="btn sm wa" onclick="sendStatusWA(${idx})">WA</button>
+        <button class="btn sm" style="border-color:#993C1D;color:#993C1D" onclick="deleteOrder(${idx})">Del</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── STATS ────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('sTotal').textContent = orders.length;
+  document.getElementById('sPending').textContent = orders.filter(o => ['Sent for Review','Designing'].includes(o.status)).length;
+  document.getElementById('sCollected').textContent = '₹' + orders.reduce((a,o)=>a+(o.advance||0),0).toLocaleString('en-IN');
+  document.getElementById('sBalance').textContent = '₹' + orders.reduce((a,o)=>a+(o.balance||0),0).toLocaleString('en-IN');
+}
+
+// ─── ALERT SOUND ─────────────────────────────────────────
+function playAlert() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.18, 0.36].forEach(t => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 900; o.type = 'sine';
+      g.gain.setValueAtTime(0.3, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.22);
+      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.25);
+    });
+  } catch(e) {}
+}
+
+function showAlert(msg) {
+  document.getElementById('alertMsg').textContent = msg;
+  document.getElementById('alertBar').classList.add('show');
+  document.getElementById('newBadge').style.display='inline';
+  document.getElementById('newBadge').style.display = 'inline';
+  playAlert();
+  if (Notification.permission === 'granted') new Notification('AS Frames', { body: msg });
+  else if (Notification.permission !== 'denied') Notification.requestPermission();
+  setTimeout(closeAlert, 9000);
+}
+function closeAlert() { document.getElementById('alertBar').classList.remove('show'); document.getElementById('newBadge').style.display='none'; }
+
+// ─── SIMULATE PORTAL ORDER ────────────────────────────────
+function simulatePortal() {
+  const demo = [
+    { name:'Priya Reddy', phone:'919876543210' },
+    { name:'Kiran M', phone:'919988776655' },
+    { name:'Anitha B', phone:'918877665544' }
+  ];
+  const d = demo[Math.floor(Math.random() * demo.length)];
+  const o = {
+    id: Date.now(), name: d.name, phone: d.phone,
+    size: '8×10', notes: 'Uploaded via customer portal',
+    status: 'New', amount: 600, advance: 0, balance: 600,
+    lastMsg: null, created: Date.now(), fromPortal: true
+  };
+  orders.push(o);
+  saveLocal();
+  pushToSheet(o);
+  render(); updateStats();
+  showAlert('New portal order from ' + d.name + '!');
+}
+
+// ─── AUTO REMIND CHECK (every 30s) ───────────────────────
+setInterval(() => {
+  render();
+  orders.forEach((o, idx) => {
+    if (o.status === 'Delivered') return;
+    const last = remindAt[idx] || o.lastMsg || o.created;
+    const mins = Math.floor((Date.now() - last) / 60000);
+    if (mins >= 120) {
+      remindAt[idx] = Date.now();
+      saveRemind();
+      showAlert('⏰ Reminder due: ' + o.name + ' hasn\'t responded in 2+ hours!');
+    }
+  });
+}, 30000);
+
+// ─── INIT ─────────────────────────────────────────────────
+if (WEBHOOK_URL) {
+  document.getElementById('setupBanner').style.display = 'none';
+  setSyncStatus(true);
+}
+render();
+updateStats();
+</script>
+</div>
+
+<script>
+function checkPw(){
+  const val = document.getElementById('pwInput').value;
+  if(val === 'Asframes@2024'){
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    localStorage.setItem('asf_auth', 'Asframes@2024');
+  } else {
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+// Check session — stays logged in while tab is open, resets when tab closes
+if(localStorage.getItem('asf_auth') === 'Asframes@2024'){
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('appContent').style.display = 'block';
+}
+</script>
+
+<!-- Customer Khata Modal -->
 <div class="overlay" id="khataModal">
 <div class="modal" style="max-width:620px">
   <h2>Customer Khata</h2>
   <div style="display:flex;gap:8px;margin-bottom:1rem">
-    <input type="text" id="khataSearch" placeholder="Type name or phone..." style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px" onkeydown="if(event.key==='Enter')doKhataSearch()">
+    <input type="text" id="khataSearch" placeholder="Type name or phone..." 
+      style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:15px">
     <button class="btn primary" onclick="doKhataSearch()">Search</button>
     <button class="btn" onclick="closeModal('khata')">Close</button>
   </div>
@@ -234,511 +613,121 @@ tbody td{padding:8px 10px;vertical-align:middle}
 </div>
 
 <script>
-var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxfF006DpIXaCkMOSzLaSZ7q51aUR1Kw1xijmrZyYQaNbyhvYbf27vjj8w6xvdRVocCjg/exec';
-var PASSWORD    = 'Asframes@2024';
-
-var WA_MSGS = {
-  'Designing':       'Hi {name}! Your AS Frames order is being designed. We will send you a preview soon.',
-  'Sent for Review': 'Hi {name}! Your frame design is ready. Please check and share your feedback.',
-  'Approved':        'Hi {name}! Your design is approved. We are now printing your frame.',
-  'Printing':        'Hi {name}! Your frame is being printed and will be ready very soon.',
-  'Ready':           'Hi {name}! Your photo frame is READY! Please collect it. Balance due: Rs.{balance}.',
-  'Delivered':       'Hi {name}! Thank you for choosing AS Frames. Hope you love your frame!'
-};
-var REMIND = 'Hi {name}! Gentle reminder from AS Frames. Please let us know if you have any feedback. Thank you!';
-
-var orders   = JSON.parse(localStorage.getItem('asf_orders') || '[]');
-var remindAt = JSON.parse(localStorage.getItem('asf_remind') || '{}');
-
-/* ── PASSWORD & IDLE LOCK ────────────────────────────────── */
-var idleTimer = null;
-function lockDash() {
-  document.getElementById('lockScreen').style.display = 'flex';
-  sessionStorage.removeItem('asf_session');
-  document.getElementById('pwInput').value = '';
-  document.getElementById('pwError').style.display = 'none';
-  clearTimeout(idleTimer);
-}
-function resetIdle() {
-  clearTimeout(idleTimer);
-  idleTimer = setTimeout(lockDash, 2 * 60 * 1000);
-}
-function startIdle() {
-  ['mousemove','keypress','click','touchstart','scroll'].forEach(function(ev){
-    document.addEventListener(ev, resetIdle);
-  });
-  resetIdle();
-}
-function checkPw() {
-  var val = document.getElementById('pwInput').value;
-  if (val === PASSWORD) {
-    document.getElementById('lockScreen').style.display = 'none';
-    sessionStorage.setItem('asf_session', PASSWORD);
-    startIdle();
-    syncFromSheet();
-  } else {
-    document.getElementById('pwError').style.display = 'block';
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwInput').focus();
-  }
-}
-if (sessionStorage.getItem('asf_session') === PASSWORD) {
-  document.getElementById('lockScreen').style.display = 'none';
-  startIdle();
-  syncFromSheet();
-}
-
-/* ── SYNC ────────────────────────────────────────────────── */
-function syncFromSheet() {
-  setSyncStatus(false);
-  document.getElementById('syncLabel').textContent = 'Syncing...';
-  var cb = 'cb_' + Date.now();
-  var sc = document.createElement('script');
-  sc.src = WEBHOOK_URL + '?callback=' + cb + '&t=' + Date.now();
-  window[cb] = function(data) {
-    try { document.body.removeChild(sc); } catch(e){}
-    delete window[cb];
-    if (data && data.success && data.orders && data.orders.length) {
-      var ids = {};
-      data.orders.forEach(function(o){ ids[String(o.id)] = true; });
-      var local = orders.filter(function(o){ return !ids[String(o.id)]; });
-      orders = data.orders.map(function(o){
-        return {id:o.id,name:o.name||'',phone:o.phone||'',size:o.size||'',frameType:o.frameType||'',qty:o.qty||1,notes:o.notes||'',amount:parseFloat(o.amount)||0,advance:parseFloat(o.advance)||0,balance:parseFloat(o.balance)||0,status:o.status||'New',lastMsg:o.lastMsg||null,created:o.created||Date.now(),fromPortal:o.fromPortal||false};
-      }).concat(local);
-      saveLocal();
-      render(); updateStats();
-    }
-    setSyncStatus(true);
-    document.getElementById('syncLabel').textContent = 'Connected (' + orders.length + ' orders)';
-  };
-  sc.onerror = function() {
-    try { document.body.removeChild(sc); } catch(e){}
-    delete window[cb];
-    setSyncStatus(true);
-    document.getElementById('syncLabel').textContent = 'Connected';
-  };
-  document.body.appendChild(sc);
-  setTimeout(function(){ setSyncStatus(true); document.getElementById('syncLabel').textContent = 'Connected'; }, 7000);
-}
-function setSyncStatus(live) {
-  document.getElementById('syncDot').className = 'dot' + (live ? ' live' : '');
-}
-function pushToSheet(order) {
-  var img = new Image();
-  img.src = WEBHOOK_URL + '?action=save&data=' + encodeURIComponent(JSON.stringify(order));
-}
-
-/* ── STORAGE ─────────────────────────────────────────────── */
-function saveLocal()  { localStorage.setItem('asf_orders', JSON.stringify(orders)); }
-function saveRemind() { localStorage.setItem('asf_remind', JSON.stringify(remindAt)); }
-function allOrders()  {
-  var saved = JSON.parse(localStorage.getItem('asf_orders') || '[]');
-  var map = {};
-  var merged = [];
-  // In-memory orders (from sync) take priority
-  orders.forEach(function(o){ map[String(o.id)]=true; merged.push(o); });
-  // Add any localStorage-only orders not yet in memory
-  saved.forEach(function(o){ if(!map[String(o.id)]) merged.push(o); });
-  return merged;
-}
-
-/* ── CUSTOMER DROPDOWN (name field) ─────────────────────── */
-function getUniqueCustomers() {
-  var all = allOrders();
-  var seen = {};
-  var list = [];
-  all.forEach(function(o){
-    if (o.name && o.phone && !seen[o.phone]) {
-      seen[o.phone] = true;
-      list.push({ name: o.name, phone: o.phone });
-    }
-  });
-  return list;
-}
-function showNameDropdown() {
-  var q = document.getElementById('f_name').value.trim().toLowerCase();
-  var customers = getUniqueCustomers();
-  var filtered = q
-    ? customers.filter(function(c){ return c.name.toLowerCase().indexOf(q)!==-1 || c.phone.indexOf(q)!==-1; })
-    : customers;
-  var list = document.getElementById('recentList');
-  if (!filtered.length) { list.style.display='none'; return; }
-  var html = '';
-  for(var i=0;i<filtered.length;i++){
-    var nm = filtered[i].name.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    var ph = filtered[i].phone;
-    html += '<div class="recent-item" onmousedown="pickCustomer(this)"'
-          + ' data-name="'+nm+'" data-phone="'+ph+'">'
-          + '<span>'+filtered[i].name+'</span>'
-          + '<span style="color:var(--text2);font-size:12px">'+ph+'</span>'
-          + '</div>';
-  }
-  list.innerHTML = html;
-  list.style.display = 'block';
-}
-
-function pickCustomer(el) {
-  document.getElementById('f_name').value  = el.getAttribute('data-name');
-  document.getElementById('f_phone').value = el.getAttribute('data-phone');
-  document.getElementById('recentList').style.display = 'none';
-}
-document.addEventListener('click', function(e){
-  var list = document.getElementById('recentList');
-  if (list && e.target.id !== 'f_name' && !list.contains(e.target)) list.style.display = 'none';
-});
-
-/* ── CALCULATIONS ───────────────────────────────────────── */
-function calcBal(p) {
-  var a   = parseFloat(document.getElementById(p+'_amount').value)  || 0;
-  var adv = parseFloat(document.getElementById(p+'_advance').value) || 0;
-  document.getElementById(p+'_balance').value = Math.max(0, a - adv);
-}
-function toggleCustom(p) {
-  var val = document.getElementById(p+'_size').value;
-  var box = document.getElementById(p+'_custombox');
-  if (val === 'Custom') { box.style.display='block'; document.getElementById(p+'_customsize').focus(); }
-  else { box.style.display='none'; document.getElementById(p+'_customsize').value=''; }
-}
-
-/* ── MODALS ──────────────────────────────────────────────── */
-function openModal(id)  {
-  document.getElementById(id+'Modal').classList.add('open');
-  if (id === 'add') {
-    // Reset form fields so dropdown shows all customers fresh each time
-    ['f_name','f_phone','f_notes','f_amount','f_advance','f_balance','f_customsize'].forEach(function(fid){ document.getElementById(fid).value=''; });
-    document.getElementById('f_qty').value='1';
-    document.getElementById('f_frametype').value='1 inch';
-    document.getElementById('f_size').value='4×6';
-    document.getElementById('f_custombox').style.display='none';
-    document.getElementById('recentList').style.display='none';
-    document.getElementById('recentList').innerHTML='';
-    setTimeout(function(){ document.getElementById('f_name').focus(); }, 150);
-  }
-}
-function closeModal(id) { document.getElementById(id+'Modal').classList.remove('open'); }
-
-/* ── ADD ORDER ───────────────────────────────────────────── */
-function addOrder() {
-  var name  = document.getElementById('f_name').value.trim();
-  var phone = document.getElementById('f_phone').value.trim();
-  if (!name||!phone) { alert('Name and phone are required.'); return; }
-  var amt = parseFloat(document.getElementById('f_amount').value)||0;
-  var adv = parseFloat(document.getElementById('f_advance').value)||0;
-  var fsize  = document.getElementById('f_size').value;
-  var fcust  = document.getElementById('f_customsize').value.trim();
-  var o = {
-    id: Date.now(), name:name, phone:phone,
-    size: (fsize==='Custom'&&fcust) ? 'Custom: '+fcust : fsize,
-    frameType: document.getElementById('f_frametype').value,
-    qty:    document.getElementById('f_qty').value,
-    notes:  document.getElementById('f_notes').value,
-    status:'New', amount:amt, advance:adv, balance:Math.max(0,amt-adv),
-    lastMsg:null, created:Date.now(), fromPortal:false
-  };
-  orders.unshift(o);
-  saveLocal();
-  pushToSheet(o);
-  closeModal('add');
-  ['f_name','f_phone','f_notes','f_amount','f_advance','f_balance','f_customsize'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('f_qty').value='1';
-  document.getElementById('f_frametype').value='1 inch';
-  document.getElementById('f_custombox').style.display='none';
-  render(); updateStats(); playAlert();
-  showAlert('Order added for '+name+'!');
-}
-
-/* ── EDIT ORDER ──────────────────────────────────────────── */
-function openEdit(idx) {
-  var o = orders[idx];
-  document.getElementById('e_idx').value     = idx;
-  document.getElementById('e_name').value    = o.name;
-  document.getElementById('e_phone').value   = o.phone;
-  document.getElementById('e_status').value  = o.status;
-  document.getElementById('e_notes').value   = o.notes||'';
-  document.getElementById('e_qty').value     = o.qty||'1';
-  document.getElementById('e_frametype').value = o.frameType||'1 inch';
-  document.getElementById('e_amount').value  = o.amount||0;
-  document.getElementById('e_advance').value = o.advance||0;
-  document.getElementById('e_balance').value = o.balance||0;
-  if (o.size && o.size.indexOf('Custom:')===0) {
-    document.getElementById('e_size').value='Custom';
-    document.getElementById('e_custombox').style.display='block';
-    document.getElementById('e_customsize').value=o.size.replace('Custom: ','');
-  } else {
-    document.getElementById('e_size').value=o.size||'4×6';
-    document.getElementById('e_custombox').style.display='none';
-    document.getElementById('e_customsize').value='';
-  }
-  openModal('edit');
-}
-function saveEdit() {
-  var idx       = parseInt(document.getElementById('e_idx').value);
-  var oldStatus = orders[idx].status;
-  var newStatus = document.getElementById('e_status').value;
-  var esize     = document.getElementById('e_size').value;
-  var ecust     = document.getElementById('e_customsize').value.trim();
-  var amt = parseFloat(document.getElementById('e_amount').value)||0;
-  var adv = parseFloat(document.getElementById('e_advance').value)||0;
-  orders[idx].name      = document.getElementById('e_name').value;
-  orders[idx].phone     = document.getElementById('e_phone').value;
-  orders[idx].size      = (esize==='Custom'&&ecust)?'Custom: '+ecust:esize;
-  orders[idx].frameType = document.getElementById('e_frametype').value;
-  orders[idx].qty       = document.getElementById('e_qty').value;
-  orders[idx].status    = newStatus;
-  orders[idx].notes     = document.getElementById('e_notes').value;
-  orders[idx].amount    = amt; orders[idx].advance=adv; orders[idx].balance=Math.max(0,amt-adv);
-  saveLocal(); pushToSheet(orders[idx]); closeModal('edit');
-  if (oldStatus!==newStatus && WA_MSGS[newStatus]) setTimeout(function(){ sendStatusWA(idx); }, 200);
-  render(); updateStats();
-}
-
-/* ── DELETE ──────────────────────────────────────────────── */
-function deleteOrder(idx) {
-  if (!confirm('Delete order for '+orders[idx].name+'?')) return;
-  orders.splice(idx,1); saveLocal(); render(); updateStats();
-}
-
-/* ── WHATSAPP ────────────────────────────────────────────── */
-function sendStatusWA(idx) {
-  var o   = orders[idx];
-  var msg = (WA_MSGS[o.status]||'').replace(/{name}/g,o.name).replace('{balance}',o.balance);
-  orders[idx].lastMsg = Date.now(); saveLocal();
-  window.open('https://wa.me/'+o.phone+'?text='+encodeURIComponent(msg),'_blank');
-  render();
-}
-function openRemind(idx) {
-  var o   = orders[idx];
-  var msg = REMIND.replace('{name}',o.name);
-  orders[idx].lastMsg=Date.now(); remindAt[idx]=Date.now(); saveLocal(); saveRemind();
-  window.open('https://wa.me/'+o.phone+'?text='+encodeURIComponent(msg),'_blank');
-  render();
-}
-
-/* ── TIME ────────────────────────────────────────────────── */
-function timeSince(ts) {
-  if (!ts) return 'Never';
-  var s=Math.floor((Date.now()-ts)/1000);
-  if(s<60) return s+'s ago';
-  if(s<3600) return Math.floor(s/60)+'m ago';
-  return Math.floor(s/3600)+'h ago';
-}
-
-/* ── RENDER ──────────────────────────────────────────────── */
-function render() {
-  var q  = document.getElementById('searchBox').value.toLowerCase().trim();
-  var sf = document.getElementById('filterStatus').value;
-  var tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  var all = allOrders();
-  // Keep orders in sync with merged result
-  orders = all;
-
-  var filtered = all.filter(function(o){
-    return (!q || (o.name||'').toLowerCase().indexOf(q)!==-1 || (o.phone||'').indexOf(q)!==-1) &&
-           (!sf || o.status===sf);
-  });
-
-  /* ── if searching and has results, show khata-style summary ── */
-  if (q && filtered.length) {
-    var customers = {};
-    filtered.forEach(function(o){
-      var key = o.phone||o.name;
-      if (!customers[key]) customers[key]={name:o.name,phone:o.phone,orders:[]};
-      customers[key].orders.push(o);
-    });
-    var keys = Object.keys(customers);
-    if (keys.length === 1) {
-      /* single customer → show khata card + their orders */
-      var c = customers[keys[0]];
-      var totalAmt  = c.orders.reduce(function(a,o){return a+(parseFloat(o.amount)||0);},0);
-      var totalPaid = c.orders.reduce(function(a,o){return a+(parseFloat(o.advance)||0);},0);
-      var totalBal  = c.orders.reduce(function(a,o){return a+(parseFloat(o.balance)||0);},0);
-      var summRow = document.createElement('tr');
-      summRow.innerHTML = '<td colspan="13" style="padding:.75rem 10px;background:var(--surface2)">'
-        + '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">'
-        + '<span style="font-weight:600">'+c.name+'</span>'
-        + '<span style="color:var(--text2);font-size:12px">'+c.phone+'</span>'
-        + '<span style="background:#E6F1FB;color:#185FA5;border-radius:999px;padding:2px 10px;font-size:12px">Total ₹'+totalAmt.toLocaleString('en-IN')+'</span>'
-        + '<span style="background:#EAF3DE;color:#2d7a4f;border-radius:999px;padding:2px 10px;font-size:12px">Paid ₹'+totalPaid.toLocaleString('en-IN')+'</span>'
-        + '<span style="background:'+(totalBal>0?'#FAECE7':'#EAF3DE')+';color:'+(totalBal>0?'#993C1D':'#2d7a4f')+';border-radius:999px;padding:2px 10px;font-size:12px">'+(totalBal>0?'Pending ₹'+totalBal.toLocaleString('en-IN'):'Fully Paid')+'</span>'
-        + (totalBal>0?'<a href="https://wa.me/'+c.phone+'?text='+encodeURIComponent('Hi '+c.name+'! You have a pending balance of Rs.'+totalBal+' at AS Frames. Kindly clear at your earliest. Thank you!')+'" target="_blank" style="background:#993C1D;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;text-decoration:none">Send Reminder</a>':'')
-        + '</div></td>';
-      tbody.appendChild(summRow);
-    }
-  }
-
-  if (!filtered.length) {
-    var emptyRow = document.createElement('tr');
-    emptyRow.innerHTML = '<td colspan="13" style="text-align:center;padding:2.5rem;color:var(--text2);font-size:13px">'+(q?'No results for "'+q+'"':'No orders. Click "+ New Order" to add one.')+'</td>';
-    tbody.appendChild(emptyRow);
-    return;
-  }
-
-  filtered.forEach(function(o){
-    var idx = orders.findIndex(function(x){ return String(x.id)===String(o.id); });
-    if (idx===-1) { orders.push(o); idx=orders.length-1; }
-    var minsAgo = o.lastMsg ? Math.floor((Date.now()-o.lastMsg)/60000) : 9999;
-    var urgent  = minsAgo>=120 && o.status!=='Delivered';
-    var sc      = ('s-'+o.status).replace(/ /g,'-');
-    var bal     = parseFloat(o.balance)||0;
-    var payHtml = bal===0
-      ? '<span style="background:#EAF3DE;color:#2d7a4f;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">Paid</span>'
-      : '<span style="background:#FAECE7;color:#993C1D;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:500">₹'+bal+' left</span>';
-    var tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td style="color:var(--text2);font-size:12px">#'+o.id+'</td>'+
-      '<td style="font-weight:500">'+o.name+(o.fromPortal?'<span class="portal-tag">portal</span>':'')+
-        (o.notes?'<br><span style="font-size:11px;color:var(--text2)">'+(o.notes||'').substring(0,35)+(o.notes.length>35?'…':'')+'</span>':'')+'</td>'+
-      '<td style="color:var(--text2)">'+o.phone+'</td>'+
-      '<td>'+(o.size||'-')+'</td>'+
-      '<td style="color:var(--text2);font-size:12px">'+(o.frameType||'-')+'</td>'+
-      '<td style="text-align:center">'+(o.qty||1)+'</td>'+
-      '<td><span class="pill '+sc+'">'+o.status+'</span></td>'+
-      '<td>₹'+o.amount+'</td>'+
-      '<td style="color:var(--green)">₹'+o.advance+'</td>'+
-      '<td style="color:'+(bal>0?'var(--red)':'var(--green)')+'">₹'+bal+'</td>'+
-      '<td>'+payHtml+'</td>'+
-      '<td><span class="timer '+(urgent?'urgent':'')+'">'+timeSince(o.lastMsg)+'</span></td>'+
-      '<td class="actions">'+
-        '<button class="btn sm" onclick="openEdit('+idx+')">Edit</button>'+
-        '<button class="btn sm wa" onclick="sendStatusWA('+idx+')">WA</button>'+
-        '<button class="btn sm remind" onclick="openRemind('+idx+')">Remind</button>'+
-        '<button class="btn sm" style="border-color:#993C1D;color:#993C1D" onclick="deleteOrder('+idx+')">Del</button>'+
-      '</td>';
-    tbody.appendChild(tr);
-  });
-}
-
-/* ── STATS ───────────────────────────────────────────────── */
-function updateStats() {
-  var all = allOrders();
-  document.getElementById('sTotal').textContent = all.length;
-  document.getElementById('sPending').textContent = all.filter(function(o){return o.status==='Sent for Review'||o.status==='Designing';}).length;
-  document.getElementById('sCollected').textContent = '₹'+all.reduce(function(a,o){return a+(parseFloat(o.advance)||0);},0).toLocaleString('en-IN');
-  document.getElementById('sBalance').textContent   = '₹'+all.reduce(function(a,o){return a+(parseFloat(o.balance)||0);},0).toLocaleString('en-IN');
-}
-
-/* ── ALERT SOUND ─────────────────────────────────────────── */
-function playAlert() {
-  try {
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    [0,0.18,0.36].forEach(function(t){
-      var o=ctx.createOscillator(),g=ctx.createGain();
-      o.connect(g);g.connect(ctx.destination);
-      o.frequency.value=900;o.type='sine';
-      g.gain.setValueAtTime(0.3,ctx.currentTime+t);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.22);
-      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.25);
-    });
-  }catch(e){}
-}
-function showAlert(msg) {
-  document.getElementById('alertMsg').textContent=msg;
-  document.getElementById('alertBar').classList.add('show');
-  document.getElementById('newBadge').style.display = 'inline';
-  playAlert();
-  if(Notification.permission==='granted') new Notification('AS Frames',{body:msg});
-  else if(Notification.permission!=='denied') Notification.requestPermission();
-  setTimeout(closeAlert,9000);
-}
-  function closeAlert(){
-  document.getElementById('alertBar').classList.remove('show');
-  document.getElementById('newBadge').style.display='none';
-}
-
-/* ── AUTO REMIND ─────────────────────────────────────────── */
-setInterval(function(){
-  render();
-  orders.forEach(function(o,idx){
-    if(o.status==='Delivered') return;
-    var last=remindAt[idx]||o.lastMsg||o.created;
-    var mins=Math.floor((Date.now()-last)/60000);
-    if(mins>=120){remindAt[idx]=Date.now();saveRemind();showAlert('Reminder due: '+o.name+' has not responded in 2+ hours!');}
-  });
-},30000);
-
-/* ── KHATA (kept as bonus) ───────────────────────────────── */
-function openKhata() {
+function openKhata(){
   document.getElementById('khataSearch').value='';
   document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">⏳ Syncing orders... please wait</p>';
   openModal('khata');
-  // Sync fresh from sheet FIRST, then allow searching
-  var cb = 'khata_cb_' + Date.now();
-  var sc = document.createElement('script');
-  sc.src = WEBHOOK_URL + '?callback=' + cb + '&t=' + Date.now();
-  window[cb] = function(data) {
-    try { document.body.removeChild(sc); } catch(e) {}
-    delete window[cb];
-    if (data && data.success && data.orders && data.orders.length) {
-      var ids = {};
-      data.orders.forEach(function(o){ ids[String(o.id)] = true; });
-      var local = orders.filter(function(o){ return !ids[String(o.id)]; });
-      orders = data.orders.map(function(o){
-        return {id:o.id,name:o.name||'',phone:o.phone||'',size:o.size||'',frameType:o.frameType||'',qty:o.qty||1,notes:o.notes||'',amount:parseFloat(o.amount)||0,advance:parseFloat(o.advance)||0,balance:parseFloat(o.balance)||0,status:o.status||'New',lastMsg:o.lastMsg||null,created:o.created||Date.now(),fromPortal:o.fromPortal||false};
-      }).concat(local);
+  // sync first then ready
+  const cbName = 'khata_cb_' + Date.now();
+  const script = document.createElement('script');
+  script.src = WEBHOOK_URL + '?callback=' + cbName + '&t=' + Date.now();
+  window[cbName] = function(data){
+    document.body.removeChild(script);
+    delete window[cbName];
+    if(data && data.success && data.orders && data.orders.length){
+      const sheetIds = data.orders.map(o => String(o.id));
+      const localOnly = orders.filter(o => !sheetIds.includes(String(o.id)));
+      orders = [...data.orders.map(o => ({...o, lastMsg:o.lastMsg||null, created:o.created||Date.now(), fromPortal:o.fromPortal||false})), ...localOnly];
       saveLocal();
       render(); updateStats();
     }
     document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">✅ '+orders.length+' orders loaded. Enter name or phone and click Search</p>';
     document.getElementById('khataSearch').focus();
   };
-  sc.onerror = function() {
-    try { document.body.removeChild(sc); } catch(e) {}
-    delete window[cb];
+  script.onerror = function(){
+    document.body.removeChild(script);
+    delete window[cbName];
     document.getElementById('khataResults').innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Enter name or phone and click Search</p>';
     document.getElementById('khataSearch').focus();
   };
-  document.body.appendChild(sc);
-}
-function doKhataSearch() {
-  var q=document.getElementById('khataSearch').value.trim().toLowerCase();
-  var resultsDiv=document.getElementById('khataResults');
-  if(!q){resultsDiv.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Please type a name or phone number</p>';return;}
-  var matched=orders.filter(function(o){return (o.name||'').toLowerCase().indexOf(q)!==-1||(o.phone||'').toString().indexOf(q)!==-1;});
-  if(!matched.length){resultsDiv.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">No customer found for "'+q+'"</p>';return;}
-  var customers={};
-  matched.forEach(function(o){var key=o.phone||o.name;if(!customers[key])customers[key]={name:o.name,phone:o.phone,orders:[]};customers[key].orders.push(o);});
-  var html='';
-  var keys=Object.keys(customers);
-  for(var ki=0;ki<keys.length;ki++){
-    var c=customers[keys[ki]];
-    var totalAmt=c.orders.reduce(function(a,o){return a+(parseFloat(o.amount)||0);},0);
-    var totalPaid=c.orders.reduce(function(a,o){return a+(parseFloat(o.advance)||0);},0);
-    var totalBal=c.orders.reduce(function(a,o){return a+(parseFloat(o.balance)||0);},0);
-    html+='<div style="background:var(--surface2);border-radius:var(--radius);padding:1rem;margin-bottom:1rem">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">';
-    html+='<div><div style="font-size:16px;font-weight:600">'+c.name+'</div><div style="font-size:12px;color:var(--text2)">'+c.phone+'</div></div>';
-    html+='<a href="https://wa.me/'+c.phone+'" target="_blank" style="background:#128C7E;color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;text-decoration:none">WhatsApp</a>';
-    html+='</div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:.75rem">';
-    html+='<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">TOTAL</div><div style="font-size:16px;font-weight:600">₹'+totalAmt.toLocaleString('en-IN')+'</div></div>';
-    html+='<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">PAID</div><div style="font-size:16px;font-weight:600;color:#2d7a4f">₹'+totalPaid.toLocaleString('en-IN')+'</div></div>';
-    html+='<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">PENDING</div><div style="font-size:16px;font-weight:600;color:'+(totalBal>0?'#993C1D':'#2d7a4f')+'">₹'+totalBal.toLocaleString('en-IN')+'</div></div>';
-    html+='</div>';
-    html+='<div style="background:var(--surface);border-radius:8px;overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html+='<thead><tr style="background:var(--surface2)"><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">#</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Size</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Frame</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Qty</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Status</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Amount</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Paid</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Pending</th></tr></thead><tbody>';
-    for(var oi=0;oi<c.orders.length;oi++){
-      var o=c.orders[oi];var bal=parseFloat(o.balance)||0;var sc2='s-'+o.status.replace(/ /g,'-');
-      html+='<tr style="border-top:0.5px solid var(--border)">';
-      html+='<td style="padding:7px 8px;color:var(--text2)">'+(oi+1)+'</td>';
-      html+='<td style="padding:7px 8px">'+(o.size||'-')+'</td>';
-      html+='<td style="padding:7px 8px;color:var(--text2)">'+(o.frameType||'-')+'</td>';
-      html+='<td style="padding:7px 8px;text-align:center">'+(o.qty||1)+'</td>';
-      html+='<td style="padding:7px 8px"><span class="pill '+sc2+'">'+o.status+'</span></td>';
-      html+='<td style="padding:7px 8px;text-align:right">₹'+(parseFloat(o.amount)||0).toLocaleString('en-IN')+'</td>';
-      html+='<td style="padding:7px 8px;text-align:right;color:#2d7a4f">₹'+(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</td>';
-      html+='<td style="padding:7px 8px;text-align:right;color:'+(bal>0?'#993C1D':'#2d7a4f')+'">₹'+bal.toLocaleString('en-IN')+'</td>';
-      html+='</tr>';
-    }
-    html+='</tbody></table></div>';
-    if(totalBal>0){var waMsg=encodeURIComponent('Hi '+c.name+'! You have a pending balance of Rs.'+totalBal+' at AS Frames. Kindly clear the payment. Thank you!');html+='<div style="margin-top:.75rem;background:#FAECE7;border-radius:8px;padding:.6rem 1rem;font-size:12px;color:#993C1D;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span>Pending: <strong>₹'+totalBal.toLocaleString('en-IN')+'</strong></span><a href="https://wa.me/'+c.phone+'?text='+waMsg+'" target="_blank" style="background:#993C1D;color:#fff;padding:4px 12px;border-radius:6px;font-size:11px;text-decoration:none">Send Reminder</a></div>';}
-    else{html+='<div style="margin-top:.75rem;background:#EAF3DE;border-radius:8px;padding:.6rem 1rem;font-size:12px;color:#2d7a4f">Fully paid!</div>';}
-    html+='</div>';
-  }
-  resultsDiv.innerHTML=html;
+  document.body.appendChild(script);
 }
 
-render(); updateStats();
+function doKhataSearch(){
+  const q = document.getElementById('khataSearch').value.trim().toLowerCase();
+  const resultsDiv = document.getElementById('khataResults');
+
+  if(!q){
+    resultsDiv.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">Please type a name or phone number</p>';
+    return;
+  }
+
+  // Search from orders array (already synced)
+  const matched = orders.filter(o =>
+    (o.name||'').toLowerCase().includes(q) || (o.phone||'').toString().includes(q)
+  );
+
+  if(!matched.length){
+    resultsDiv.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:1rem">No customer found for "<b>'+q+'</b>"</p>';
+    return;
+  }
+
+  // Group by phone
+  const customers = {};
+  matched.forEach(o => {
+    const key = o.phone || o.name;
+    if(!customers[key]) customers[key] = {name:o.name, phone:o.phone, orders:[]};
+    customers[key].orders.push(o);
+  });
+
+  let html = '';
+  Object.values(customers).forEach(c => {
+    const totalAmt  = c.orders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+    const totalPaid = c.orders.reduce((a,o)=>a+(parseFloat(o.advance)||0),0);
+    const totalBal  = totalAmt - totalPaid;
+
+    html += '<div style="background:var(--surface2);border-radius:var(--radius);padding:1rem;margin-bottom:1rem">';
+
+    // Header
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">';
+    html += '<div><div style="font-size:16px;font-weight:600">'+c.name+'</div><div style="font-size:12px;color:var(--text2)">'+c.phone+'</div></div>';
+    html += '<a href="https://wa.me/'+c.phone+'" target="_blank" style="background:#128C7E;color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;text-decoration:none">WhatsApp</a>';
+    html += '</div>';
+
+    // Summary
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:.75rem">';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">TOTAL</div><div style="font-size:16px;font-weight:600">₹'+totalAmt.toLocaleString("en-IN")+'</div></div>';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">PAID</div><div style="font-size:16px;font-weight:600;color:#2d7a4f">₹'+totalPaid.toLocaleString("en-IN")+'</div></div>';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:.6rem;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">PENDING</div><div style="font-size:16px;font-weight:600;color:'+(totalBal>0?'#993C1D':'#2d7a4f')+'">'+(totalBal<0?'Credit ₹'+Math.abs(totalBal).toLocaleString('en-IN'):'₹'+totalBal.toLocaleString('en-IN'))+'</div></div>';
+    html += '</div>';
+
+    // Orders table
+    html += '<div style="background:var(--surface);border-radius:8px;overflow:auto">';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    html += '<thead><tr style="background:var(--surface2)"><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">#</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Size</th><th style="padding:7px 8px;text-align:left;color:var(--text2);font-weight:500">Status</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Amount</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Paid</th><th style="padding:7px 8px;text-align:right;color:var(--text2);font-weight:500">Pending</th></tr></thead><tbody>';
+
+    c.orders.forEach((o,i)=>{
+      const bal = parseFloat(o.balance)||0;
+      const sc = 's-'+o.status.replace(/ /g,'-');
+      html += '<tr style="border-top:0.5px solid var(--border)">';
+      html += '<td style="padding:7px 8px;color:var(--text2)">'+(i+1)+'</td>';
+      html += '<td style="padding:7px 8px">'+o.size+'</td>';
+      html += '<td style="padding:7px 8px"><span class="pill '+sc+'">'+o.status+'</span></td>';
+      html += '<td style="padding:7px 8px;text-align:right">₹'+(parseFloat(o.amount)||0).toLocaleString("en-IN")+'</td>';
+      html += '<td style="padding:7px 8px;text-align:right;color:#2d7a4f">₹'+(parseFloat(o.advance)||0).toLocaleString("en-IN")+'</td>';
+      html += '<td style="padding:7px 8px;text-align:right;color:'+(bal>0?'#993C1D':'#2d7a4f')+'">₹'+bal.toLocaleString("en-IN")+'</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+
+    // Pending alert
+    if(totalBal > 0){
+      const waMsg = encodeURIComponent('Hi '+c.name+'! You have a pending balance of ₹'+totalBal+' at AS Frames. Kindly clear the payment at your earliest. Thank you! 🙏');
+      html += '<div style="margin-top:.75rem;background:#FAECE7;border-radius:8px;padding:.6rem 1rem;font-size:12px;color:#993C1D;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">';
+      html += '<span>⚠️ Pending: <strong>₹'+totalBal.toLocaleString('en-IN')+'</strong></span>';
+      html += '<a href="https://wa.me/'+c.phone+'?text='+waMsg+'" target="_blank" style="background:#993C1D;color:#fff;padding:4px 12px;border-radius:6px;font-size:11px;text-decoration:none">Send Reminder</a>';
+      html += '</div>';
+    } else if(totalBal < 0) {
+      html += '<div style="margin-top:.75rem;background:#EAF3DE;border-radius:8px;padding:.6rem 1rem;font-size:12px;color:#2d7a4f;display:flex;justify-content:space-between;align-items:center"><span>Credit balance: <strong>₹'+Math.abs(totalBal).toLocaleString('en-IN')+'</strong></span></div>';
+    } else {
+      html += '<div style="margin-top:.75rem;background:#EAF3DE;border-radius:8px;padding:.6rem 1rem;font-size:12px;color:#2d7a4f">✅ Fully paid — no pending balance!</div>';
+    }
+
+    html += '</div>';
+  });
+
+  resultsDiv.innerHTML = html;
+}
 </script>
 </body>
-</html>
